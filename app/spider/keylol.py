@@ -3,19 +3,19 @@
 # @Author       : Chr_
 # @Date         : 2020-06-30 05:08:57
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 00:28:46
+# @LastEditTime : 2020-12-15 01:14:32
 # @Description  : 对接Keylol的API【异步】
 '''
 
-import asyncio
-from httpx import AsyncClient
 
-from .log import get_logger
+from logging import getLogger
+from requests import Session
+
 from .static import URLs
-from .aionet import adv_http_get_keylol
+from .net import get_json
 
 
-logger = get_logger('Keylol')
+logger = getLogger('Keylol')
 
 
 async def get_games_tags(appids: list) -> dict:

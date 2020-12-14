@@ -3,29 +3,29 @@
 # @Author       : Chr_
 # @Date         : 2020-12-15 00:35:49
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 00:41:14
+# @LastEditTime : 2020-12-15 01:18:27
 # @Description  : 带自动重试的请求器
 '''
 
 import re
 import json
-import asyncio
+from logging import getLogger
+from time import sleep
+from bs4 import BeautifulSoup
+from requests import Session, Response
 
-from httpx import Response, AsyncClient
+from.static import HEADERS, TREAD_CD, TIMEOUT
 
-from .log import get_logger
-from .static import TREAD_CD,TIMEOUT,HEADERS
-
-logger = get_logger('Net')
+logger = getLogger('Net')
 
 
-async def adv_http_get(client: AsyncClient, url: str, params: dict = None,
-                       headers: dict = None, retrys: int = 3) -> Response:
+async def get_html(session: Session, url: str, params: dict = None,
+                   headers: dict = None, retrys: int = 3) -> BeautifulSoup:
     '''
     出错自动重试的请求器
 
     参数:
-        client: httpx对象
+        session: httpx对象
         url: url
         params: params
         headers: headers
@@ -33,33 +33,33 @@ async def adv_http_get(client: AsyncClient, url: str, params: dict = None,
     返回:
         Response: 请求结果
     '''
-    if not headers :
-        headers=HEADERS
+    if not headers:
+        headers = HEADERS
     for _ in range(0, retrys):
         try:
-            resp = await client.get(url=url, params=params, headers=headers,timeout=TIMEOUT)
-            print('.', end='')
-            await asyncio.sleep(TREAD_CD)
-            return (resp)
+            resp = session.get(url=url, params=params,
+                               headers=headers, timeout=TIMEOUT)
+            resp.encoding = 'utf-8'
+            soup = BeautifulSoup(resp.text, 'lxml')
+            return soup
         except Exception:
             if _ == 0:
                 logger.debug('网络错误,暂停5秒')
-                await asyncio.sleep(5)
+                sleep(5)
             else:
                 logger.warning('网络错误,暂停15秒')
-                await asyncio.sleep(15)
+                sleep(15)
 
-    logger.error('网络错误,请求失败')
-    return (None)
+    return None
 
 
-async def adv_http_get_keylol(client: AsyncClient, url: str, params: dict = None,
-                              headers: dict = None, retrys: int = 3) -> Response:
+def k_get_json(session: Session, url: str, params: dict = None,
+               headers: dict = None, retrys: int = 3) -> Response:
     '''
     出错自动重试的请求器
 
     参数:
-        client: httpx对象
+        session: httpx对象
         url: url
         params: params
         headers: headers
@@ -67,23 +67,56 @@ async def adv_http_get_keylol(client: AsyncClient, url: str, params: dict = None
     返回:
         Response: 请求结果
     '''
-    if not headers :
-        headers=HEADERS
+    if not headers:
+        headers = HEADERS
     for _ in range(0, retrys):
         try:
-            resp = await client.get(url=url, params=params, headers=headers,timeout=TIMEOUT)
-            print('.', end='')
+            resp = session.get(url=url, params=params,
+                               headers=headers, timeout=TIMEOUT)
             pattern = re.compile(r'(\{.+\})', re.MULTILINE)
             matchobj = pattern.search(resp.text)
             jd = json.loads(matchobj.group(1))
-            await asyncio.sleep(TREAD_CD)
+            sleep(TREAD_CD)
             return (jd)
         except Exception:
             if _ == 0:
                 logger.debug('网络错误,暂停8秒')
-                await asyncio.sleep(8)
+                sleep(8)
             else:
                 logger.warning('网络错误,暂停30秒')
-                await asyncio.sleep(30)
+                sleep(30)
+    logger.error('网络错误,请求失败')
+    return {}
+
+
+def get_json(session: Session, url: str, params: dict = None,
+             headers: dict = None, retrys: int = 3) -> dict:
+    '''
+    出错自动重试的请求器
+
+    参数:
+        session: httpx对象
+        url: url
+        params: params
+        headers: headers
+        [retrys]: 重试次数,默认为3
+    返回:
+        Response: 请求结果
+    '''
+    if not headers:
+        headers = HEADERS
+    for _ in range(0, retrys):
+        try:
+            resp = session.get(url=url, params=params,
+                               headers=headers, timeout=TIMEOUT)
+            jd = resp.json()
+            return jd
+        except Exception:
+            if _ == 0:
+                logger.debug('网络错误,暂停8秒')
+                sleep(8)
+            else:
+                logger.warning('网络错误,暂停30秒')
+                sleep(30)
     logger.error('网络错误,请求失败')
     return {}

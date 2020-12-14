@@ -1,3 +1,5 @@
 mysqlclient
 django
 requests
+bs4
+lxml
