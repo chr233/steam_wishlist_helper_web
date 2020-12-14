@@ -1,24 +1,78 @@
-from django.contrib.auth.models import User, Group
-from rest_framework import viewsets
+
+'''
+# @Author       : Chr_
+# @Date         : 2020-12-11 20:05:41
+# @LastEditors  : Chr_
+# @LastEditTime : 2020-12-14 20:55:43
+# @Description  : 视图函数
+'''
+
+from django.db.models.query_utils import InvalidQuery
+from django.http.response import Http404
+from rest_framework import serializers, status, viewsets
 from rest_framework import permissions
-from app.serializers import UserSerializer, GroupSerializer
+from rest_framework.response import Response
+from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerializer
+
+from .models import GameInfo, Tags, Company
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class GameInfoViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if not request.user.is_authenticated:
+            qs = queryset.filter(ready=True)
+        else:
+            qs = queryset
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(qs, many=True)
+        print(serializer.data)
+        return Response(serializer.data)
+
+    def retrieve(self, request,  *args, **kwargs):
+        try:
+            game = self.get_object()
+        except Http404:
+            try:
+                pk = int(kwargs['pk'])
+            except ValueError:
+                raise Http404
+            game = GameInfo(appid=pk)
+            game.save()
+
+        if not game.ready:
+            if not request.user.is_authenticated:
+                raise Http404
+        else:
+            game.cview += 1
+            game.save()
+
+        serializer = GameInfoSerializer(game)
+        return Response(serializer.data)
+
+    queryset = GameInfo.objects.all()
+    serializer_class = GameInfoSerializer
 
 
-class GroupViewSet(viewsets.ModelViewSet):
+class CompantViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows groups to be viewed or edited.
+    API endpoint that allows users to be viewed or edited.
     """
-    queryset = Group.objects.all()
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
 
 
+class TagsViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = Tags.objects.all()
+    serializer_class = TagsSerializer
