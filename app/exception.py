@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from rest_framework.views import exception_handler
 
 def exception_handler(exc, context):

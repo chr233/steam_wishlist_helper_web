@@ -1,4 +1,4 @@
-
+# -*- coding: UTF-8 -*-
 '''
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
@@ -7,15 +7,15 @@
 # @Description  : 视图函数
 '''
 
-from django.db.models.query_utils import InvalidQuery
 from django.http.response import Http404
-from rest_framework import serializers, status, viewsets
-from rest_framework import permissions
+from rest_framework import viewsets
 from rest_framework.response import Response
 from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerializer
 
 from .models import GameInfo, Tags, Company
+from .task import init_scheduler
 
+init_scheduler()
 
 class GameInfoViewSet(viewsets.ModelViewSet):
     """
