@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-05-03 23:20:00
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 20:18:31
+# @LastEditTime : 2020-12-16 04:49:45
 # @Description  : 静态常量
 '''
 
@@ -13,13 +13,11 @@ ALMOST_LOWEST = 0.05
 # 网络超时时间
 TIMEOUT = 10
 
-# 每个线程的等待时间
-TREAD_CD = 0.8
-
 
 class URLs():
     '''URL常量'''
     Steam_Store = 'https://store.steampowered.com/'
+    Steam_Store_App = 'https://store.steampowered.com/app/%s'
     Steam_Wishlist = 'https://store.steampowered.com/wishlist/profiles/%s/#sort=%s'
     Steam_Wishlist_XHR = 'https://store.steampowered.com/wishlist/profiles/%s/wishlistdata/?p=%s'
     Steam_Game_Pic_SM = 'https://steamcdn-a.akamaihd.net/steam/apps/%s/capsule_sm_120.jpg'
@@ -43,6 +41,12 @@ HEADERS = {
     "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36 Steam_Wishlist_Helper",
 }
+
+
+STEAM_COOKIES_CN = {'wants_mature_content': '1',
+                    'birthtime': '22503171', 'Steam_Language': 'schinese'}
+STEAM_COOKIES_EN = {'wants_mature_content': '1',
+                    'birthtime': '22503171', 'Steam_Language': 'english'}
 
 Review2Num = {
     'Error': -1,

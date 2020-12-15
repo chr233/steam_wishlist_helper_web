@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 15:04:53
+# @LastEditTime : 2020-12-16 04:57:01
 # @Description  : 数据库模型
 '''
 
@@ -67,11 +67,13 @@ class GameInfo(models.Model):
     '''游戏信息'''
     appid = models.IntegerField(primary_key=True, unique=True, db_index=True,
                                 verbose_name='appid', help_text='游戏的AppID')
-
+                                
     ready = models.BooleanField(default=False,
-                                verbose_name='可用', help_text='True代表数据存在,False代表等待爬虫获取')
+                                verbose_name='可用', help_text='数据是否可用')
     card = models.BooleanField(default=False,
                                verbose_name="卡牌", help_text='有无卡牌')
+    audlt = models.BooleanField(default=False,
+                               verbose_name="“仅限成人", help_text='是否被标记为仅限成人')
     free = models.BooleanField(default=False,
                                verbose_name='免费', help_text='是否为免费游戏')
     release = models.BooleanField(default=False,

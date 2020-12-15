@@ -3,71 +3,53 @@
 # @Author       : Chr_
 # @Date         : 2020-06-21 15:41:24
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 01:14:20
-# @Description  : 读取Steam愿望单信息【异步】
+# @LastEditTime : 2020-12-16 04:52:26
+# @Description  : 读取Steam愿望单信息
 '''
 
-from requests import Session
+# from soupsieve import select
+# from app import serializers
+
 from logging import getLogger
-from bs4 import BeautifulSoup
 from json import JSONDecodeError
-from.static import HEADERS,URLs
+from bs4 import BeautifulSoup
+
+from requests import Session
+from requests.cookies import RequestsCookieJar
+from .static import HEADERS, URLs, STEAM_COOKIES_CN, STEAM_COOKIES_EN
+from .basic import retry_get
+
+logger = getLogger('Steam')
 
 
-async def get_game_info(appid:int) -> dict:
-    '''
-    获取steam愿望单单页详情
+def get_store_soup(session: Session, url: str, language: str = 'EN') -> BeautifulSoup:
+    cookies = STEAM_COOKIES_EN if language == 'EN' else STEAM_COOKIES_CN
 
-    参数:
-        client: httpx异步client对象
-        steamid: 64位steamid
-        page: 页码
-    返回:
-        dict: 愿望单信息字典,key:{游戏信息}
-    '''
-    url = URLs.Steam_Wishlist_XHR % (steamid, page)
-    headers = {
-        'Referer': URLs.Steam_Wishlist % (steamid, 'order')
-    }
-    resp = await adv_http_get(client=client, url=url, headers=headers)
-    wishlist = {}
+    resp = retry_get(session=session, url=url, cookies=cookies)
     if resp:
-        try:
-            datajson = resp.json()
-        except (JSONDecodeError, AttributeError):
-            logger.error('Json解析失败')
-            logger.error(resp.content)
-            return {}
+        resp.encoding = 'utf-8'
+        soup = BeautifulSoup(resp.text, 'lxml')
+        return soup
+    else:
+        logger.warning('请求失败,结束')
+        return None
 
-        for key in datajson.keys():
-            data = datajson[key]
-            review_score = int(data.get('review_score', -1))
-            key = int(key)
-            wishlist[key] = {
-                'name': data.get('name', '【解析出错】'),
-                'picture': PIC_URL % key,
-                'review': {
-                    'score': review_score,
-                    'result': Num2Review.get(review_score, 'Error'),
-                    'total': int(data.get('reviews_total', '0').replace(',', '')),
-                    'percent': int(data.get('reviews_percent', 0)),
-                },
-                'release_date': int(data.get('release_date', 0)),
-                'subs': [s['id'] for s in data.get('subs', [])],
-                'free': data.get('is_free_game', False),
-                'type': GameType2Num.get(data.get('type', 'Error'), 0),
-                'priority': data.get('priority', 0),
-                'tags': data.get('tags', []),
-                'add_date': int(data.get('added', 0)),
-                # 'rank': int(data.get('rank', 0)),
-                'price': {},
-                'platform': (
-                    data.get('win', 0) == 1,
-                    data.get('mac', 0) == 1,
-                    data.get('linux', 0) == 1
-                ),
-                "card": False
-            }
-            if wishlist[key]['name'] == '【解析出错】':
-                logger.debug(f'数据解析失败 {data}')
-    return (wishlist)
+
+def get_soup_key(soup: BeautifulSoup, selector: str, key: str) -> str:
+    s = soup.select_one(selector)
+    return s.get(key) if s else ''
+
+
+def get_game_info_base(appid: int):
+    ss = Session()
+    url = URLs.Steam_Store_App % appid
+    soup_en = get_store_soup(session=ss, url=url, language='EN')
+    soup_cn = get_store_soup(session=ss, url=url, language='CN')
+
+    n = soup_en.select_one('.apphub_AppName')
+    n_cn = soup_cn.select_one('.apphub_AppName')
+
+    name = n.text if n else ''
+    name_cn = n_cn.text if n_cn else ''
+
+    print(name,name_cn)
