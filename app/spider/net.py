@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-15 00:35:49
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 01:18:27
+# @LastEditTime : 2020-12-15 20:19:02
 # @Description  : 带自动重试的请求器
 '''
 
@@ -19,20 +19,10 @@ from.static import HEADERS, TREAD_CD, TIMEOUT
 logger = getLogger('Net')
 
 
+
+
 async def get_html(session: Session, url: str, params: dict = None,
                    headers: dict = None, retrys: int = 3) -> BeautifulSoup:
-    '''
-    出错自动重试的请求器
-
-    参数:
-        session: httpx对象
-        url: url
-        params: params
-        headers: headers
-        [retrys]: 重试次数,默认为3
-    返回:
-        Response: 请求结果
-    '''
     if not headers:
         headers = HEADERS
     for _ in range(0, retrys):
@@ -49,24 +39,11 @@ async def get_html(session: Session, url: str, params: dict = None,
             else:
                 logger.warning('网络错误,暂停15秒')
                 sleep(15)
-
     return None
 
 
 def k_get_json(session: Session, url: str, params: dict = None,
                headers: dict = None, retrys: int = 3) -> Response:
-    '''
-    出错自动重试的请求器
-
-    参数:
-        session: httpx对象
-        url: url
-        params: params
-        headers: headers
-        [retrys]: 重试次数,默认为3
-    返回:
-        Response: 请求结果
-    '''
     if not headers:
         headers = HEADERS
     for _ in range(0, retrys):
@@ -91,18 +68,6 @@ def k_get_json(session: Session, url: str, params: dict = None,
 
 def get_json(session: Session, url: str, params: dict = None,
              headers: dict = None, retrys: int = 3) -> dict:
-    '''
-    出错自动重试的请求器
-
-    参数:
-        session: httpx对象
-        url: url
-        params: params
-        headers: headers
-        [retrys]: 重试次数,默认为3
-    返回:
-        Response: 请求结果
-    '''
     if not headers:
         headers = HEADERS
     for _ in range(0, retrys):

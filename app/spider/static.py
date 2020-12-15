@@ -3,21 +3,12 @@
 # @Author       : Chr_
 # @Date         : 2020-05-03 23:20:00
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 01:12:49
+# @LastEditTime : 2020-12-15 20:18:31
 # @Description  : 静态常量
 '''
 
-# 脚本版本
-SCRIPT_VERSION = '1.11'
-
-# 缓存数据库名称
-DB_NAME = 'data.db'
-
-# 输出文件夹名称
-OP_PATH = 'output'
-
-# 可用排序种类
-SORT_TYPE = 7
+# 近史低标准
+ALMOST_LOWEST = 0.05
 
 # 网络超时时间
 TIMEOUT = 10
@@ -25,15 +16,9 @@ TIMEOUT = 10
 # 每个线程的等待时间
 TREAD_CD = 0.8
 
-# 近史低标准
-ALMOST_LOWEST = 0.05
-
 
 class URLs():
-    '''
-    URL常量
-    '''
-
+    '''URL常量'''
     Steam_Store = 'https://store.steampowered.com/'
     Steam_Wishlist = 'https://store.steampowered.com/wishlist/profiles/%s/#sort=%s'
     Steam_Wishlist_XHR = 'https://store.steampowered.com/wishlist/profiles/%s/wishlistdata/?p=%s'

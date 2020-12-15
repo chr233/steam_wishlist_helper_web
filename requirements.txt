@@ -3,3 +3,9 @@ django
 requests
 bs4
 lxml
+django_apscheduler
+ujson
+psutil
+djangorestframework
+markdown
+django-filter

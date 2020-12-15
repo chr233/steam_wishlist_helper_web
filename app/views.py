@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 14:08:11
+# @LastEditTime : 2020-12-15 20:03:02
 # @Description  : 视图函数
 '''
 
@@ -13,15 +13,11 @@ from rest_framework.response import Response
 from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerializer
 
 from .models import GameInfo, Tags, Company
-# from .task import init_scheduler
 
-# init_scheduler()
+from .task import init_scheduler
+init_scheduler()
 
 class GameInfoViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         if not request.user.is_authenticated:
@@ -63,16 +59,10 @@ class GameInfoViewSet(viewsets.ModelViewSet):
 
 
 class CompantViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
 
 class TagsViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
     queryset = Tags.objects.all()
     serializer_class = TagsSerializer
