@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-14 20:55:43
+# @LastEditTime : 2020-12-15 14:08:11
 # @Description  : 视图函数
 '''
 
@@ -13,9 +13,9 @@ from rest_framework.response import Response
 from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerializer
 
 from .models import GameInfo, Tags, Company
-from .task import init_scheduler
+# from .task import init_scheduler
 
-init_scheduler()
+# init_scheduler()
 
 class GameInfoViewSet(viewsets.ModelViewSet):
     """

@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-14 20:16:00
+# @LastEditTime : 2020-12-15 15:04:53
 # @Description  : 数据库模型
 '''
 
@@ -30,10 +30,10 @@ class Tags(models.Model):
                                verbose_name='中文名', help_text='标签中文名')
 
     def __str__(self) -> str:
-        if self.name_cn != '*':
-            return f'{self.name_cn} | {self.name}'
+        if self.name_cn != '*' and self.name_cn != '':
+            return f'{self.id} {self.name_cn} ( {self.name} )'
         else:
-            return self.name
+            return f'{self.id} {self.name}'
 
     class Meta:
         ordering = ('id',)
@@ -52,10 +52,10 @@ class Company(models.Model):
                                verbose_name='中文名', help_text='公司中文名')
 
     def __str__(self) -> str:
-        if self.name_cn != '*':
-            return f'{self.name_cn} | {self.name}'
+        if self.name_cn != '*' and self.name_cn != '':
+            return f'{self.id} {self.name_cn} ( {self.name} )'
         else:
-            return self.name
+            return f'{self.id} {self.name}'
 
     class Meta:
         ordering = ('id',)
