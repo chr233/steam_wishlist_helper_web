@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-16 04:57:01
+# @LastEditTime : 2020-12-16 15:56:20
 # @Description  : 数据库模型
 '''
 
@@ -24,10 +24,10 @@ class Tags(models.Model):
     id = models.AutoField(primary_key=True, unique=True, db_index=True,
                           verbose_name='标签ID', help_text='标签ID',)
     name = models.CharField(max_length=20, unique=True, db_index=True,
-                            verbose_name='英文名', help_text='标签英文名')
+                            verbose_name='标签名', help_text='标签中文名')
 
-    name_cn = models.CharField(max_length=20, default='*', blank=True, db_index=True,
-                               verbose_name='中文名', help_text='标签中文名')
+    name_en = models.CharField(max_length=20, default='*', blank=True, db_index=True,
+                               verbose_name='英文名', help_text='标签英文名')
 
     def __str__(self) -> str:
         if self.name_cn != '*' and self.name_cn != '':
@@ -47,13 +47,12 @@ class Company(models.Model):
                           verbose_name='公司ID', help_text='公司ID',)
     name = models.CharField(max_length=20, unique=True, db_index=True,
                             verbose_name='英文名', help_text='公司英文名')
-
-    name_cn = models.CharField(max_length=20, default='*', blank=True, db_index=True,
-                               verbose_name='中文名', help_text='公司中文名')
+    desc = models.CharField(max_length=20, default='', blank=True,
+                               verbose_name='备注', help_text='公司备注')
 
     def __str__(self) -> str:
         if self.name_cn != '*' and self.name_cn != '':
-            return f'{self.id} {self.name_cn} ( {self.name} )'
+            return f'{self.id} {self.name} ( {self.desc} )'
         else:
             return f'{self.id} {self.name}'
 

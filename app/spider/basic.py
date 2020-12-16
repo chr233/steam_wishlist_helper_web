@@ -10,6 +10,7 @@
 from logging import getLogger
 from time import sleep
 from requests import Session, Response
+from time import time
 
 from.static import HEADERS, TIMEOUT
 
@@ -35,3 +36,6 @@ def retry_get(session: Session, url: str, params: dict = None,
             else:
                 logger.warning('网络错误,暂停15秒')
                 sleep(15)
+
+def get_timestamp():
+    return int(time())
