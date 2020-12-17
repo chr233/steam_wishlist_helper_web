@@ -3,10 +3,11 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 20:03:02
+# @LastEditTime : 2020-12-17 16:35:16
 # @Description  : 视图函数
 '''
-
+from sys import argv
+from django.conf import settings
 from django.http.response import Http404
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -14,8 +15,12 @@ from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerialize
 
 from .models import GameInfo, Tags, Company
 
-from .task import init_scheduler
-init_scheduler()
+# if (argv and 'run' in argv[-1]):
+#     from .task import register_job
+
+
+TIME_DECREASE = settings.SWH_SETTINGS['TIME_DECREASE']
+
 
 class GameInfoViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
@@ -49,6 +54,12 @@ class GameInfoViewSet(viewsets.ModelViewSet):
                 raise Http404
         else:
             game.cview += 1
+            t = game.tuinfo
+            if t >= TIME_DECREASE:
+                game.tuinfo = t-TIME_DECREASE
+            t = game.tuprice
+            if t >= TIME_DECREASE:
+                game.tuprice = t-TIME_DECREASE
             game.save()
 
         serializer = GameInfoSerializer(game)

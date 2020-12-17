@@ -3,7 +3,7 @@ django
 requests
 bs4
 lxml
-django_apscheduler
+django-crontab
 ujson
 psutil
 djangorestframework

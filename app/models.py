@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-16 15:56:20
+# @LastEditTime : 2020-12-17 16:36:28
 # @Description  : 数据库模型
 '''
 
@@ -24,16 +24,13 @@ class Tags(models.Model):
     id = models.AutoField(primary_key=True, unique=True, db_index=True,
                           verbose_name='标签ID', help_text='标签ID',)
     name = models.CharField(max_length=20, unique=True, db_index=True,
-                            verbose_name='标签名', help_text='标签中文名')
+                            verbose_name='中文名', help_text='标签中文名')
 
-    name_en = models.CharField(max_length=20, default='*', blank=True, db_index=True,
+    name_en = models.CharField(max_length=20,unique=True, db_index=True,
                                verbose_name='英文名', help_text='标签英文名')
 
     def __str__(self) -> str:
-        if self.name_cn != '*' and self.name_cn != '':
-            return f'{self.id} {self.name_cn} ( {self.name} )'
-        else:
-            return f'{self.id} {self.name}'
+        return f'{self.id}.{self.name} {self.name_en}'
 
     class Meta:
         ordering = ('id',)
@@ -46,15 +43,15 @@ class Company(models.Model):
     id = models.AutoField(primary_key=True, unique=True, db_index=True,
                           verbose_name='公司ID', help_text='公司ID',)
     name = models.CharField(max_length=20, unique=True, db_index=True,
-                            verbose_name='英文名', help_text='公司英文名')
+                            verbose_name='公司名', help_text='公司名称')
     desc = models.CharField(max_length=20, default='', blank=True,
-                               verbose_name='备注', help_text='公司备注')
+                            verbose_name='备注', help_text='公司备注')
 
     def __str__(self) -> str:
-        if self.name_cn != '*' and self.name_cn != '':
-            return f'{self.id} {self.name} ( {self.desc} )'
+        if self.desc != '' :
+            return f'{self.id}.{self.name}({self.desc})'
         else:
-            return f'{self.id} {self.name}'
+            return f'{self.id}.{self.name}'
 
     class Meta:
         ordering = ('id',)
@@ -66,13 +63,13 @@ class GameInfo(models.Model):
     '''游戏信息'''
     appid = models.IntegerField(primary_key=True, unique=True, db_index=True,
                                 verbose_name='appid', help_text='游戏的AppID')
-                                
+
     ready = models.BooleanField(default=False,
                                 verbose_name='可用', help_text='数据是否可用')
     card = models.BooleanField(default=False,
                                verbose_name="卡牌", help_text='有无卡牌')
     audlt = models.BooleanField(default=False,
-                               verbose_name="“仅限成人", help_text='是否被标记为仅限成人')
+                                verbose_name="“仅限成人", help_text='是否被标记为仅限成人')
     free = models.BooleanField(default=False,
                                verbose_name='免费', help_text='是否为免费游戏')
     release = models.BooleanField(default=False,
@@ -97,14 +94,16 @@ class GameInfo(models.Model):
 
     tadd = models.IntegerField(default=0,
                                verbose_name='添加时间', help_text='添加时间戳')
-    tlowest = models.IntegerField(default=0,
-                                  verbose_name='史低时间', help_text='史低时间戳')
-    tupdate = models.IntegerField(default=0, db_index=True,
-                                  verbose_name='更新时间', help_text='下次更新时间戳')
-    tmodify = models.IntegerField(default=0,
-                                  verbose_name='修改时间', help_text='上次修改时间戳')
     trelease = models.IntegerField(default=0,
                                    verbose_name='发行时间', help_text='游戏发行时间戳')
+    tlowest = models.IntegerField(default=0,
+                                  verbose_name='史低时间', help_text='史低时间戳')
+    tmodify = models.IntegerField(default=0, db_index=True,
+                                  verbose_name='修改时间', help_text='最后一次爬取的时间戳')
+    tuprice = models.IntegerField(default=0, db_index=True,
+                                  verbose_name='价格更新时间', help_text='下次更新价格信息的时间戳')
+    tuinfo = models.IntegerField(default=0,
+                                 verbose_name='信息更新时间', help_text='下次更新基本信息的时间戳')
 
     cview = models.IntegerField(default=0,
                                 verbose_name='访问', help_text='访问计数器')

@@ -1,4 +1,6 @@
+from django import urls
 from django.urls import include, path
+from django.contrib import admin
 from rest_framework import routers
 from app import views
 from rest_framework.authtoken.views import obtain_auth_token
@@ -13,5 +15,6 @@ router.register(r'company', views.CompantViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('api-token-auth/', obtain_auth_token)
+    path('api-token-auth/', obtain_auth_token),
+    path('admin', admin.site.urls)
 ]

@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:24:13
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-16 03:15:31
+# @LastEditTime : 2020-12-17 15:51:30
 # @Description  : 序列化器
 '''
 
@@ -15,7 +15,7 @@ from .models import Company, GameInfo, Tags
 class TagsSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Tags
-        fields = ['id', 'name', 'name_cn']
+        fields = ['id', 'name', 'name_en']
         extra_kwargs = {
             'id': {'read_only': True},
         }
@@ -24,7 +24,7 @@ class TagsSerializer(serializers.HyperlinkedModelSerializer):
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ['id', 'name', 'name_cn']
+        fields = ['id', 'name', 'desc']
         extra_kwargs = {
             'id': {'read_only': True},
         }
@@ -41,12 +41,12 @@ class GameInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameInfo
         fields = ['appid', 'name', 'name_cn',
-                  'ready', 'card', 'free',
-                  'release', 'rscore', 'rtotal', 'rpercent',
+                  'ready', 'card', 'audlt', 'free', 'release',
+                  'rscore', 'rtotal', 'rpercent',
                   'pcurrent', 'porigin', 'plowest', 'pcut', 'plowestcut',
-                  'tadd', 'tlowest', 'tupdate', 'tmodify', 'trelease',
-                  'cview', 'cupdate', 'cerror', 'tags', 'rtags',
-                  'develop', 'rdevelop', 'publish', 'rpublish']
+                  'tadd', 'trelease', 'tlowest', 'tmodify', 'tuprice', 'tuinfo',
+                  'cview', 'cupdate', 'cerror',
+                  'tags', 'rtags', 'develop', 'rdevelop', 'publish', 'rpublish']
         extra_kwargs = {
             'tags': {'write_only': True},
             'develop': {'write_only': True},

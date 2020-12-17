@@ -2,3 +2,4 @@ swhweb/settings.py
 *.pyc
 .vscode/
 __pycache__/
+*.log
