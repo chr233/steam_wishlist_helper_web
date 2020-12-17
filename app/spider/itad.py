@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-07-08 19:48:26
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-17 20:53:50
+# @LastEditTime : 2020-12-18 02:03:20
 # @Description  : 对接ITAD的API接口
 '''
 
@@ -46,7 +46,7 @@ def get_plains(session: Session, ids: list) -> dict:
                 result[id_] = plain
             else:
                 # result[id_] = ''
-                logger.warning(f'读取App{id_}出错,忽略该App')
+                logger.warning(f'读取App{id_}出错')
     return result
 
 
@@ -105,7 +105,9 @@ def get_prices(plains: list) -> dict:
         for p in sub:
             p_new, p_old, p_cut = current.get(p) or [-1, -1, 0]
             p_low, p_lcut, p_time = lowest.get(p) or [-1, 0, 0]
-            result[p] = {'pcurrent': p_new,
+            free = p_old == 0
+            result[p] = {'free': free,
+                         'pcurrent': p_new,
                          'porigin': p_old,
                          'pcut': p_cut,
                          'plowest': p_low,

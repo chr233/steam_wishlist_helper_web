@@ -3,30 +3,24 @@
 # @Author       : Chr_
 # @Date         : 2020-06-21 15:41:24
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 00:49:20
+# @LastEditTime : 2020-12-18 01:07:23
 # @Description  : 爬取Steam商店信息
 '''
 
+from logging import getLogger
 from re import findall
 from time import strptime, mktime
-from logging import getLogger
 from bs4 import BeautifulSoup
-
 from requests import Session
+
 from .static import URLs, Norst, STEAM_COOKIES_CN, STEAM_COOKIES_EN
-from .basic import retry_get, get_timestamp
-
-# from django.conf import settings
-# UPDATE_PERIOD = settings.SWH_SETTINGS['INFO_UPDATE_PERIOD']
-
-UPDATE_PERIOD = 10 * 86400
+from .basic import retry_get
 
 logger = getLogger('Steam')
 
 
-def get_store_soup(session: Session, url: str, language: str = 'EN') -> BeautifulSoup:
+def get_store_soup(session: Session, url: str, language: str = 'CN') -> BeautifulSoup:
     cookies = STEAM_COOKIES_EN if language == 'EN' else STEAM_COOKIES_CN
-
     resp = retry_get(session=session, url=url, cookies=cookies)
     if resp:
         soup = BeautifulSoup(resp.text, 'lxml')
@@ -35,7 +29,8 @@ def get_store_soup(session: Session, url: str, language: str = 'EN') -> Beautifu
         logger.warning('请求失败,结束')
         return None
 
-def get_game_info(session: Session,appid: int):
+
+def get_game_info(session: Session, appid: int):
     url = URLs.Steam_Store_App % appid
     soup_en = get_store_soup(session=session, url=url, language='EN')
     soup_cn = get_store_soup(session=session, url=url, language='CN')
@@ -52,7 +47,7 @@ def get_game_info(session: Session,appid: int):
     card = bool(c.select_one('img[src$="ico_cards.png"]'))
 
     # 是否锁偏好
-    audlt = bool(soup_cn.select_one('.mature_content_notice'))
+    adult = bool(soup_cn.select_one('.mature_content_notice'))
 
     # 右侧信息框
     info_en = soup_en.select_one('.glance_ctn')
@@ -90,11 +85,7 @@ def get_game_info(session: Session,appid: int):
         rscore = 0
         rpercent = 0
 
-    tmodify = get_timestamp()
-    tuinfo = get_timestamp() + UPDATE_PERIOD
-
-    return {'name': name, 'name_cn': name_cn,
-            'card': card, 'audlt': audlt, 'release': release,
-            'rscore': rscore, 'rtotal': rtotal, 'rpercent': rpercent,
-            'trelease': trelease, 'tuinfo': tuinfo, 'tmodify': tmodify,
+    return {'name': name, 'name_cn': name_cn, 'card': card,
+            'adult': adult, 'release': release, 'rscore': rscore,
+            'rtotal': rtotal, 'rpercent': rpercent, 'trelease': trelease,
             'tags': tags, 'develop': develop, 'publish': publish}

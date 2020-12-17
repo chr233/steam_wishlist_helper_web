@@ -68,7 +68,7 @@ class GameInfo(models.Model):
                                 verbose_name='可用', help_text='数据是否可用')
     card = models.BooleanField(default=False,
                                verbose_name="卡牌", help_text='有无卡牌')
-    audlt = models.BooleanField(default=False,
+    adult = models.BooleanField(default=False,
                                 verbose_name="“仅限成人", help_text='是否被标记为仅限成人')
     free = models.BooleanField(default=False,
                                verbose_name='免费', help_text='是否为免费游戏')

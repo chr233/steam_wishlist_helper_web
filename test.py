@@ -2,26 +2,29 @@
 # @Author       : Chr_
 # @Date         : 2020-12-16 04:15:38
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 00:47:26
+# @LastEditTime : 2020-12-18 01:19:53
 # @Description  : 测试专用
 '''
 
+from app.spider import keylol as steam  # ,itad
 import sys
 
 from rest_framework.fields import JSONField
 sys.path.append("/home/dev/steam_wishlist_helper_web/app/spider")
 
-from app.spider import steam#,itad
-ss=steam.Session()
 
-print(steam.get_game_info(ss,1256610))
-print(steam.get_game_info(ss,730))
-print(steam.get_game_info(ss,812140))
-print(steam.get_game_info(ss,263280))
-print(steam.get_game_info(ss,1167700))
-print(steam.get_game_info(ss,1477440))
-print(steam.get_game_info(ss,1058500))
-print(steam.get_game_info(ss,1082040))
+ss = steam.Session()
+
+print(steam.get_game_info(ss, 880250))
+print(steam.get_game_info(ss, 1386650))
+print(steam.get_game_info(ss, 1256610))
+print(steam.get_game_info(ss, 730))
+print(steam.get_game_info(ss, 812140))
+print(steam.get_game_info(ss, 263280))
+print(steam.get_game_info(ss, 1167700))
+print(steam.get_game_info(ss, 1477440))
+print(steam.get_game_info(ss, 1058500))
+print(steam.get_game_info(ss, 1082040))
 
 # import re
 

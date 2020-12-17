@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-15 00:35:49
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 00:49:41
+# @LastEditTime : 2020-12-18 00:53:32
 # @Description  : 带自动重试的请求器
 '''
 
@@ -84,8 +84,9 @@ def retry_get_json_keylol(session: Session, url: str, params: dict = None,
             if resp.status_code == 200:
                 resp.encoding = 'utf-8'
                 raw = findall(r'(\{.+\})', resp.text, MULTILINE)
-                jd = loads(raw)
-                return jd
+                if raw:
+                    jd = loads(raw[0])
+                    return jd
         except JSONDecodeError:
             logger.warning('JSON解析失败')
         except Exception as e:
