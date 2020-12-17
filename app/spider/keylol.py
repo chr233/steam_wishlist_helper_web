@@ -3,8 +3,8 @@
 # @Author       : Chr_
 # @Date         : 2020-06-30 05:08:57
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-15 01:14:32
-# @Description  : 对接Keylol的API【异步】
+# @LastEditTime : 2020-12-18 00:38:09
+# @Description  : 对接Keylol的API接口
 '''
 
 
@@ -12,47 +12,16 @@ from logging import getLogger
 from requests import Session
 
 from .static import URLs
-from .net import get_json
+from .basic import retry_get_json_keylol
 
 
 logger = getLogger('Keylol')
 
-
-async def get_games_tags(appids: list) -> dict:
-    '''
-    异步读取Steam愿望单
-
-    参数:
-        appids: appid列表
-    返回：
-        dict: 游戏信息字典
-    '''
-    gameinfo = {}
-    if appids:
-        async with AsyncClient() as client:
-            tasks = {
-                asyncio.create_task(_get_game_tags(client=client, appid=i)) for i in appids
-            }
-            await asyncio.wait(tasks)
-        for task in tasks:
-            gameinfo.update(task.result())
-    return (gameinfo)
-
-
-async def _get_game_tags(client: AsyncClient, appid: int) -> dict:
-    '''
-    其乐API,读取steam游戏信息
-
-    参数:
-        appid: appid
-    返回:
-        dict: 包含游戏附加信息的dict
-    '''
+async def get_game_info(session: Session, appid: int) -> dict:
+    '''读取steam游戏信息'''
     url = URLs.Keylol_Get_Game_Info % appid
-    async with AsyncClient() as client:
-        jd = await adv_http_get_keylol(client=client,
-                                       url=url,
-                                       retrys=3)
+
+    jd = retry_get_json_keylol(session=session, url=url)
     result = {}
     if jd:
         result[appid] = {
@@ -60,5 +29,5 @@ async def _get_game_tags(client: AsyncClient, appid: int) -> dict:
             # 'categories': [(int(x[0]), x[1])for x in raw.get('categories', [])],
             'card': len(jd.get('card', [])) > 0,
             # 'description': jd.get('description', '')
-            }
+        }
     return (result)

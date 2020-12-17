@@ -3,23 +3,32 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-17 16:35:16
+# @LastEditTime : 2020-12-17 20:54:13
 # @Description  : 视图函数
 '''
 from sys import argv
 from django.conf import settings
-from django.http.response import Http404
+from django.http.response import Http404, JsonResponse
 from rest_framework import viewsets
 from rest_framework.response import Response
+# from django.contrib import requests
 from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerializer
 
 from .models import GameInfo, Tags, Company
 
-# if (argv and 'run' in argv[-1]):
-#     from .task import register_job
-
+from .spider.itad import get_plains, get_prices,Session
 
 TIME_DECREASE = settings.SWH_SETTINGS['TIME_DECREASE']
+
+
+def test(requests):
+    ss=Session()
+    a = get_plains(ss,[379720, 730, 236850, 1167700])
+    b = get_prices(ss,a.values())
+
+    result = {'A':a,'B':b}
+
+    return JsonResponse({'result': result})
 
 
 class GameInfoViewSet(viewsets.ModelViewSet):
