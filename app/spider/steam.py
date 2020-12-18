@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-06-21 15:41:24
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 01:07:23
+# @LastEditTime : 2020-12-18 12:19:43
 # @Description  : 爬取Steam商店信息
 '''
 
@@ -13,7 +13,7 @@ from time import strptime, mktime
 from bs4 import BeautifulSoup
 from requests import Session
 
-from .static import URLs, Norst, STEAM_COOKIES_CN, STEAM_COOKIES_EN
+from .static import URLs, Norst,AppNotFound, STEAM_COOKIES_CN, STEAM_COOKIES_EN
 from .basic import retry_get
 
 logger = getLogger('Steam')
@@ -35,16 +35,23 @@ def get_game_info(session: Session, appid: int):
     soup_en = get_store_soup(session=session, url=url, language='EN')
     soup_cn = get_store_soup(session=session, url=url, language='CN')
 
-    # 锁区,锁偏好,以及其他错误
-    if bool(soup_cn.select_one('.error')):
-        return None
+    # 锁区,需要登录,以及其他错误
+    emsg = (soup_cn.select_one('.error') or Norst).text
+    if emsg!='' :
+        logger.warning(f'读取APP {appid} 出错 {emsg}')
+        return None #返回空值,通过其他方式获取信息
 
     # 游戏名称
     name = (soup_en.select_one('.apphub_AppName') or Norst).text
     name_cn = (soup_cn.select_one('.apphub_AppName') or Norst).text
 
-    c = soup_cn.select_one('#category_block')
-    card = bool(c.select_one('img[src$="ico_cards.png"]'))
+    # 下架,被ban,直接跳转到首页获取不到标题
+    if name == '':
+        logger.warning(f'读取APP {appid} 出错')
+        raise AppNotFound(f'读取APP {appid} 出错')
+
+    c = soup_cn.select_one('#category_block img[src$="ico_cards.png"]')
+    card = bool(c or False) 
 
     # 是否锁偏好
     adult = bool(soup_cn.select_one('.mature_content_notice'))
@@ -85,7 +92,7 @@ def get_game_info(session: Session, appid: int):
         rscore = 0
         rpercent = 0
 
-    return {'name': name, 'name_cn': name_cn, 'card': card,
+    return {'name': name, 'name_cn': name_cn, 'source': 1, 'card': card,
             'adult': adult, 'release': release, 'rscore': rscore,
             'rtotal': rtotal, 'rpercent': rpercent, 'trelease': trelease,
             'tags': tags, 'develop': develop, 'publish': publish}

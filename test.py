@@ -2,7 +2,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-16 04:15:38
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 01:19:53
+# @LastEditTime : 2020-12-18 10:39:12
 # @Description  : 测试专用
 '''
 
@@ -15,6 +15,7 @@ sys.path.append("/home/dev/steam_wishlist_helper_web/app/spider")
 
 ss = steam.Session()
 
+print(steam.get_game_info(ss, 873290))
 print(steam.get_game_info(ss, 880250))
 print(steam.get_game_info(ss, 1386650))
 print(steam.get_game_info(ss, 1256610))

@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-05-03 23:20:00
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-17 13:37:33
+# @LastEditTime : 2020-12-18 12:46:21
 # @Description  : 静态常量
 '''
 
@@ -12,6 +12,20 @@ ALMOST_LOWEST = 0.05
 
 # 网络超时时间
 TIMEOUT = 10
+
+
+HEADERS = {
+    "Accept": "application/json",
+    "Accept-Encoding": "gzip",
+    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36 Steam_Wishlist_Helper",
+}
+
+
+STEAM_COOKIES_CN = {'wants_mature_content': '1',
+                    'birthtime': '22503171', 'Steam_Language': 'schinese'}
+STEAM_COOKIES_EN = {'wants_mature_content': '1',
+                    'birthtime': '22503171', 'Steam_Language': 'english'}
 
 
 class URLs():
@@ -34,22 +48,25 @@ class URLs():
     Github_Releases = 'https://github.com/chr233/steam_wishlist_helper/releases'
     Github_Releases_API = 'https://api.github.com/repos/chr233/steam_wishlist_helper/releases/latest'
 
+
 class Norst():
     '''未找到结果'''
-    text=''
-
-HEADERS = {
-    "Accept": "application/json",
-    "Accept-Encoding": "gzip",
-    "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.183 Safari/537.36 Steam_Wishlist_Helper",
-}
+    text = ''
 
 
-STEAM_COOKIES_CN = {'wants_mature_content': '1',
-                    'birthtime': '22503171', 'Steam_Language': 'schinese'}
-STEAM_COOKIES_EN = {'wants_mature_content': '1',
-                    'birthtime': '22503171', 'Steam_Language': 'english'}
+class AppNotFound(Exception):
+    '''App不存在'''
+    msg: str
+
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self) -> str:
+        return self.msg
+
+    def __repr__(self) -> str:
+        return self.msg
+
 
 Review2Num = {
     'Error': -1,

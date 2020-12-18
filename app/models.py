@@ -3,10 +3,11 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-17 16:36:28
+# @LastEditTime : 2020-12-18 12:39:26
 # @Description  : 数据库模型
 '''
 
+from random import choices
 from django.db import models
 
 
@@ -26,7 +27,7 @@ class Tags(models.Model):
     name = models.CharField(max_length=20, unique=True, db_index=True,
                             verbose_name='中文名', help_text='标签中文名')
 
-    name_en = models.CharField(max_length=20,unique=True, db_index=True,
+    name_en = models.CharField(max_length=20, unique=True, db_index=True,
                                verbose_name='英文名', help_text='标签英文名')
 
     def __str__(self) -> str:
@@ -48,7 +49,7 @@ class Company(models.Model):
                             verbose_name='备注', help_text='公司备注')
 
     def __str__(self) -> str:
-        if self.desc != '' :
+        if self.desc != '':
             return f'{self.id}.{self.name}({self.desc})'
         else:
             return f'{self.id}.{self.name}'
@@ -61,11 +62,18 @@ class Company(models.Model):
 
 class GameInfo(models.Model):
     '''游戏信息'''
+    TYPES = (('', '-'), ('G', '游戏'), ('S', '软件'), ('D', 'DLC'), ('V', '视频'))
+    SOURCE = (('', '-'), ('S', 'Steam'), ('K', 'Keylol'))
     appid = models.IntegerField(primary_key=True, unique=True, db_index=True,
                                 verbose_name='appid', help_text='游戏的AppID')
-
-    ready = models.BooleanField(default=False,
-                                verbose_name='可用', help_text='数据是否可用')
+    gtype = models.CharField(default='', max_length=1,  choices=TYPES,
+                             verbose_name='类型', help_text='商店分类')
+    source = models.CharField(default='', max_length=1,  choices=SOURCE,
+                              verbose_name='来源', help_text='数据来源')
+    eupdate = models.BooleanField(default=True,
+                                  verbose_name='启用更新', help_text='是否自动更新,错误次数超过设定自动禁用')
+    visable = models.BooleanField(default=False,
+                                  verbose_name='数据可见', help_text='数据是否可被查看')
     card = models.BooleanField(default=False,
                                verbose_name="卡牌", help_text='有无卡牌')
     adult = models.BooleanField(default=False,

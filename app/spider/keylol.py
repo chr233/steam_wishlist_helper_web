@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-06-30 05:08:57
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 02:02:05
+# @LastEditTime : 2020-12-18 12:19:55
 # @Description  : 对接Keylol的API接口
 '''
 
@@ -68,12 +68,15 @@ def get_game_info(session: Session, appid: int) -> dict:
     url = URLs.Keylol_Get_Game_Info % appid
     jd = retry_get_json_keylol(session=session, url=url)
     if jd:
-        name = name_cn = jd.get('name', '【读取出错】')
-        card = bool(jd.get('card')),
+        name = name_cn = jd.get('name', '无法显示游戏信息')
+        if name == '无法显示游戏信息':
+            logger.warning(f'读取APP {appid} 出错')
+            return None
+        card = bool(jd.get('card'))
         audlt = False
-        tags = jd.get('tags', []),
-        develop = jd.get('developer', []),
-        publish = jd.get('publisher', []),
+        tags = [(x, '')for x in jd.get('tags', [])]
+        develop = jd.get('developer', [])
+        publish = jd.get('publisher', [])
         release = bool(jd.get('price_steam'))
         if release:
             t = jd.get('release')
@@ -91,13 +94,10 @@ def get_game_info(session: Session, appid: int) -> dict:
             rpercent = 0
             rscore = 0
     else:
-        name = name_cn = ''
-        card = audlt = release = False
-        rscore, = rtotal = rpercent = trelease = 0
-        tags = develop = publish = []
-        logger.warning(f'读取APP{appid}出错')
+        logger.warning(f'读取APP {appid} 出错')
+        return None
 
-    return {'name': name, 'name_cn': name_cn,'card': card, 
-            'audlt': audlt, 'release': release,'rscore': rscore, 
-            'rtotal': rtotal, 'rpercent': rpercent,'trelease': trelease,
+    return {'name': name, 'name_cn': name_cn, 'source': 2, 'card': card,
+            'audlt': audlt, 'release': release, 'rscore': rscore,
+            'rtotal': rtotal, 'rpercent': rpercent, 'trelease': trelease,
             'tags': tags, 'develop': develop, 'publish': publish}

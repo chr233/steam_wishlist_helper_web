@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-17 20:54:13
+# @LastEditTime : 2020-12-18 12:59:46
 # @Description  : 视图函数
 '''
 from sys import argv
@@ -58,7 +58,7 @@ class GameInfoViewSet(viewsets.ModelViewSet):
             game = GameInfo(appid=pk)
             game.save()
 
-        if not game.ready:
+        if not game.visable:
             if not request.user.is_authenticated:
                 raise Http404
         else:

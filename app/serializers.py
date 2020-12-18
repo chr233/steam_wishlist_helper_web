@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:24:13
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-17 15:51:30
+# @LastEditTime : 2020-12-18 12:06:04
 # @Description  : 序列化器
 '''
 
@@ -41,13 +41,18 @@ class GameInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameInfo
         fields = ['appid', 'name', 'name_cn',
-                  'ready', 'card', 'audlt', 'free', 'release',
+                  'gtype','source',
+                  'eupdate','visable', 'card', 'audlt', 'free', 'release',
                   'rscore', 'rtotal', 'rpercent',
                   'pcurrent', 'porigin', 'plowest', 'pcut', 'plowestcut',
                   'tadd', 'trelease', 'tlowest', 'tmodify', 'tuprice', 'tuinfo',
                   'cview', 'cupdate', 'cerror',
                   'tags', 'rtags', 'develop', 'rdevelop', 'publish', 'rpublish']
         extra_kwargs = {
+            'eupdate': {'write_only': True},
+            'visable': {'write_only': True},
+            'gtype': {'write_only': True},
+            'source': {'write_only': True},
             'tags': {'write_only': True},
             'develop': {'write_only': True},
             'publish': {'write_only': True},
