@@ -3,12 +3,12 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 12:59:46
+# @LastEditTime : 2020-12-18 18:04:10
 # @Description  : 视图函数
 '''
 from sys import argv
 from django.conf import settings
-from django.http.response import Http404, JsonResponse
+from django.http.response import Http404, HttpResponse, JsonResponse
 from rest_framework import viewsets
 from rest_framework.response import Response
 # from django.contrib import requests
@@ -16,26 +16,24 @@ from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerialize
 
 from .models import GameInfo, Tags, Company
 
-from .spider.itad import get_plains, get_prices,Session
+from .spider.itad import get_plains, get_prices, Session
+
+from .updater import update_base_info
 
 TIME_DECREASE = settings.SWH_SETTINGS['TIME_DECREASE']
 
 
 def test(requests):
-    ss=Session()
-    a = get_plains(ss,[379720, 730, 236850, 1167700])
-    b = get_prices(ss,a.values())
+    update_base_info()
 
-    result = {'A':a,'B':b}
-
-    return JsonResponse({'result': result})
+    return HttpResponse('done')
 
 
 class GameInfoViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         if not request.user.is_authenticated:
-            qs = queryset.filter(ready=True)
+            qs = queryset.filter(visible=True)
         else:
             qs = queryset
         page = self.paginate_queryset(qs)
@@ -58,7 +56,7 @@ class GameInfoViewSet(viewsets.ModelViewSet):
             game = GameInfo(appid=pk)
             game.save()
 
-        if not game.visable:
+        if not game.visible:
             if not request.user.is_authenticated:
                 raise Http404
         else:

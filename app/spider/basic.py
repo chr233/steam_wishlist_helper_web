@@ -3,13 +3,13 @@
 # @Author       : Chr_
 # @Date         : 2020-12-15 00:35:49
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 00:53:32
+# @LastEditTime : 2020-12-18 17:15:04
 # @Description  : 带自动重试的请求器
 '''
 
 from json.decoder import JSONDecodeError
 from logging import getLogger
-from time import sleep
+from time import sleep, strftime
 from re import findall, MULTILINE
 from time import time
 from json import loads
@@ -24,8 +24,14 @@ def get_timestamp():
     return int(time())
 
 
+def print_log(message: str):
+    '''打印日志'''
+    print(f'{strftime("%Y-%m-%d %H:%M:%S")} {message}')
+
+
 def retry_get(session: Session, url: str, params: dict = None,
               headers: dict = None, cookies: dict = None, retrys: int = 3) -> Response:
+    '''带自动重试的请求器,返回soup'''
     if not headers:
         headers = HEADERS
 
@@ -48,6 +54,7 @@ def retry_get(session: Session, url: str, params: dict = None,
 
 def retry_get_json(session: Session, url: str, params: dict = None,
                    headers: dict = None, cookies: dict = None, retrys: int = 3) -> dict:
+    '''带自动重试的请求器,返回json'''
     if not headers:
         headers = HEADERS
 
@@ -74,6 +81,7 @@ def retry_get_json(session: Session, url: str, params: dict = None,
 
 def retry_get_json_keylol(session: Session, url: str, params: dict = None,
                           headers: dict = None, cookies: dict = None, retrys: int = 3) -> dict:
+    '''带自动重试的请求器,返回json,keylol专用'''
     if not headers:
         headers = HEADERS
 

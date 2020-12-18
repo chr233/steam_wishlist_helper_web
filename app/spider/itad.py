@@ -3,17 +3,14 @@
 # @Author       : Chr_
 # @Date         : 2020-07-08 19:48:26
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 02:03:20
+# @LastEditTime : 2020-12-18 17:18:37
 # @Description  : 对接ITAD的API接口
 '''
 
-from logging import getLogger
-
 from random import choice
 from requests import Session
-from .static import URLs, Norst
-from .basic import retry_get_json, get_timestamp
 from .static import URLs
+from .basic import retry_get_json, print_log
 
 from django.conf import settings
 
@@ -21,7 +18,6 @@ TOKENS = settings.SWH_SETTINGS['ITAD_TOKENS']
 REGION = settings.SWH_SETTINGS['REGION']
 COUNTRY = settings.SWH_SETTINGS['COUNTRY']
 
-logger = getLogger('ITAD')
 
 
 def __api_interface(session: Session, url: str, params: dict):
@@ -46,7 +42,7 @@ def get_plains(session: Session, ids: list) -> dict:
                 result[id_] = plain
             else:
                 # result[id_] = ''
-                logger.warning(f'读取App{id_}出错')
+                print_log(f'读取App{id_}出错')
     return result
 
 
@@ -62,7 +58,7 @@ def get_current_prices(session: Session, plains: list) -> dict:
         for plain in data.keys():
             d = data[plain].get('list', [])
             if len(d) > 1:
-                logger.debug(f'{plain} {d}')
+                print_log(f'{plain} {d}')
             if d:
                 p_new = d[0]['price_new']
                 p_old = d[0]['price_old']

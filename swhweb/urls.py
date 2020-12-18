@@ -8,7 +8,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 router = routers.DefaultRouter()
 router.register(r'games', views.GameInfoViewSet)
 router.register(r'tags', views.TagsViewSet)
-router.register(r'company', views.CompantViewSet)
+router.register(r'companys', views.CompantViewSet)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

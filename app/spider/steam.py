@@ -3,20 +3,18 @@
 # @Author       : Chr_
 # @Date         : 2020-06-21 15:41:24
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 12:19:43
+# @LastEditTime : 2020-12-18 17:17:22
 # @Description  : 爬取Steam商店信息
 '''
 
-from logging import getLogger
 from re import findall
 from time import strptime, mktime
 from bs4 import BeautifulSoup
 from requests import Session
 
-from .static import URLs, Norst,AppNotFound, STEAM_COOKIES_CN, STEAM_COOKIES_EN
-from .basic import retry_get
+from .static import URLs, Norst, AppNotFound, STEAM_COOKIES_CN, STEAM_COOKIES_EN
+from .basic import print_log, retry_get
 
-logger = getLogger('Steam')
 
 
 def get_store_soup(session: Session, url: str, language: str = 'CN') -> BeautifulSoup:
@@ -26,7 +24,7 @@ def get_store_soup(session: Session, url: str, language: str = 'CN') -> Beautifu
         soup = BeautifulSoup(resp.text, 'lxml')
         return soup
     else:
-        logger.warning('请求失败,结束')
+        print_log('请求失败,结束')
         return None
 
 
@@ -37,9 +35,9 @@ def get_game_info(session: Session, appid: int):
 
     # 锁区,需要登录,以及其他错误
     emsg = (soup_cn.select_one('.error') or Norst).text
-    if emsg!='' :
-        logger.warning(f'读取APP {appid} 出错 {emsg}')
-        return None #返回空值,通过其他方式获取信息
+    if emsg != '':
+        print_log(f'读取APP {appid} 出错 {emsg}')
+        return None  # 返回空值,通过其他方式获取信息
 
     # 游戏名称
     name = (soup_en.select_one('.apphub_AppName') or Norst).text
@@ -47,11 +45,11 @@ def get_game_info(session: Session, appid: int):
 
     # 下架,被ban,直接跳转到首页获取不到标题
     if name == '':
-        logger.warning(f'读取APP {appid} 出错')
+        print_log(f'读取APP {appid} 出错')
         raise AppNotFound(f'读取APP {appid} 出错')
 
     c = soup_cn.select_one('#category_block img[src$="ico_cards.png"]')
-    card = bool(c or False) 
+    card = bool(c or False)
 
     # 是否锁偏好
     adult = bool(soup_cn.select_one('.mature_content_notice'))
@@ -86,11 +84,10 @@ def get_game_info(session: Session, appid: int):
         raw = r[-1].get('data-tooltip-html')
         rpercent = int((findall(r'\d+', raw) or [0])[-1])
     else:
-        trelease = 0
+        rscore = 0
         rtotal = 0
         rpercent = 0
-        rscore = 0
-        rpercent = 0
+        trelease = 0
 
     return {'name': name, 'name_cn': name_cn, 'source': 1, 'card': card,
             'adult': adult, 'release': release, 'rscore': rscore,

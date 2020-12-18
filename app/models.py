@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 12:39:26
+# @LastEditTime : 2020-12-18 18:38:15
 # @Description  : 数据库模型
 '''
 
@@ -24,10 +24,9 @@ class Tags(models.Model):
     '''标签'''
     id = models.AutoField(primary_key=True, unique=True, db_index=True,
                           verbose_name='标签ID', help_text='标签ID',)
-    name = models.CharField(max_length=20, unique=True, db_index=True,
+    name = models.CharField(max_length=50, unique=True, db_index=True,
                             verbose_name='中文名', help_text='标签中文名')
-
-    name_en = models.CharField(max_length=20, unique=True, db_index=True,
+    name_en = models.CharField(max_length=50, unique=True, db_index=True,
                                verbose_name='英文名', help_text='标签英文名')
 
     def __str__(self) -> str:
@@ -43,9 +42,9 @@ class Company(models.Model):
     '''发行商或者发行商'''
     id = models.AutoField(primary_key=True, unique=True, db_index=True,
                           verbose_name='公司ID', help_text='公司ID',)
-    name = models.CharField(max_length=20, unique=True, db_index=True,
+    name = models.CharField(max_length=50, unique=True, db_index=True,
                             verbose_name='公司名', help_text='公司名称')
-    desc = models.CharField(max_length=20, default='', blank=True,
+    desc = models.CharField(max_length=50, default='', blank=True,
                             verbose_name='备注', help_text='公司备注')
 
     def __str__(self) -> str:
@@ -70,14 +69,14 @@ class GameInfo(models.Model):
                              verbose_name='类型', help_text='商店分类')
     source = models.CharField(default='', max_length=1,  choices=SOURCE,
                               verbose_name='来源', help_text='数据来源')
-    eupdate = models.BooleanField(default=True,
+    eupdate = models.BooleanField(default=True,db_index=True,
                                   verbose_name='启用更新', help_text='是否自动更新,错误次数超过设定自动禁用')
-    visable = models.BooleanField(default=False,
+    visible = models.BooleanField(default=False,db_index=True,
                                   verbose_name='数据可见', help_text='数据是否可被查看')
     card = models.BooleanField(default=False,
                                verbose_name="卡牌", help_text='有无卡牌')
     adult = models.BooleanField(default=False,
-                                verbose_name="“仅限成人", help_text='是否被标记为仅限成人')
+                                verbose_name="仅限成人", help_text='是否被标记为仅限成人')
     free = models.BooleanField(default=False,
                                verbose_name='免费', help_text='是否为免费游戏')
     release = models.BooleanField(default=False,
