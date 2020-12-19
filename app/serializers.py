@@ -3,19 +3,18 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:24:13
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 00:58:28
+# @LastEditTime : 2020-12-20 02:22:50
 # @Description  : 序列化器
 '''
 
 from rest_framework import serializers
-from .models import Company, GameInfo, Tag
+from .models import AccessStats, Company, GameAddList, GameBanList, GameInfo, Status, Tag
 
 
-class TagSerializer(serializers.HyperlinkedModelSerializer):
-    
+class AccessStatsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Tag
-        fields = ['id', 'name', 'name_en']
+        model = AccessStats
+        fields = ['id', 'ip', 'ban', 'path']
         extra_kwargs = {
             'id': {'read_only': True},
         }
@@ -30,34 +29,66 @@ class CompanySerializer(serializers.ModelSerializer):
         }
 
 
+class GameAddListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GameAddList
+        fields = ['id', 'appid', 'tadd', 'cview']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
 
-class GameInfoSerializer(serializers.ModelSerializer):
-    rtags = serializers.SlugRelatedField(
-        read_only=True, many=True, source='tags', slug_field='name')
-    rdevelop = serializers.SlugRelatedField(
-        read_only=True, many=True, source='develop', slug_field='name')
-    rpublish = serializers.SlugRelatedField(
-        read_only=True, many=True, source='publish', slug_field='name')
 
+class GameBanListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GameBanList
+        fields = ['id', 'appid', 'tadd', 'cview']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
+
+
+class GameSimpleInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = GameInfo
-        fields = ['appid', 'name', 'name_cn',
-                  'gtype','source',
-                  'eupdate','visible', 'card', 'adult', 'free', 'release',
+        fields = ['appid', 'name', 'name_cn', 'gtype', 'source',
+                  'eupdate',  'card', 'limit', 'adult', 'free', 'release',
+                  'rscore', 'rtotal', 'rpercent',
+                  'pcurrent', 'porigin', 'plowest', 'pcut', 'plowestcut',
+                  'trelease', 'tlowest', 'tmodify',
+                  'tags', 'develop',  'publish']
+        extra_kwargs = {
+            'appid': {'read_only': True},
+        }
+
+
+class GameFullInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GameInfo
+        fields = ['appid', 'name', 'name_cn', 'gtype', 'source',
+                  'eupdate',  'card', 'limit', 'adult', 'free', 'release',
                   'rscore', 'rtotal', 'rpercent',
                   'pcurrent', 'porigin', 'plowest', 'pcut', 'plowestcut',
                   'tadd', 'trelease', 'tlowest', 'tmodify', 'tuprice', 'tuinfo',
-                  'cview', 'cupdate', 'cerror',
-                  'tags', 'rtags', 'develop', 'rdevelop', 'publish', 'rpublish']
+                  'cview', 'cupdate', 'cerror', 'tags',  'develop',  'publish']
         extra_kwargs = {
-            # 'eupdate': {'write_only': True},
-            # 'visible': {'write_only': True},
-            'gtype': {'write_only': True},
-            'source': {'write_only': True},
-            'tags': {'write_only': True},
-            'develop': {'write_only': True},
-            'publish': {'write_only': True},
-            'rtags': {'read_only': True},
-            'rdevelop': {'read_only': True},
-            'rpublish': {'read_only': True},
+            'appid': {'read_only': True},
+        }
+
+
+class StatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Status
+        fields = ['id', 'name', 'value']
+        extra_kwargs = {
+            'id': {'read_only': True},
+        }
+
+
+class TagSerializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = ['id', 'name', 'name_en']
+        extra_kwargs = {
+            'id': {'read_only': True},
         }
