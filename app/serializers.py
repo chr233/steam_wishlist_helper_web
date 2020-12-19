@@ -3,18 +3,18 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:24:13
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 18:14:56
+# @LastEditTime : 2020-12-20 00:58:28
 # @Description  : 序列化器
 '''
 
 from rest_framework import serializers
-from rest_framework.utils import serializer_helpers
-from .models import Company, GameInfo, Tags
+from .models import Company, GameInfo, Tag
 
 
-class TagsSerializer(serializers.HyperlinkedModelSerializer):
+class TagSerializer(serializers.HyperlinkedModelSerializer):
+    
     class Meta:
-        model = Tags
+        model = Tag
         fields = ['id', 'name', 'name_en']
         extra_kwargs = {
             'id': {'read_only': True},
@@ -28,6 +28,7 @@ class CompanySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'id': {'read_only': True},
         }
+
 
 
 class GameInfoSerializer(serializers.ModelSerializer):

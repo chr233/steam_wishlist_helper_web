@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from .models import GameInfo, Tags, Company
+from .models import GameInfo, Tag, Company
 from .spider.basic import get_timestamp, Session
 from .spider.steam import get_game_info as steam_info
 from .spider.keylol import get_game_info as keylol_info
@@ -12,13 +12,13 @@ PRICE_PERIOD = settings.SWH_SETTINGS['PRICE_UPDATE_PERIOD']
 MAX_ERROR = settings.SWH_SETTINGS['MAX_ERROR']
 
 
-def gen_tags_list(tags: list) -> list:
+def gen_tag_list(tags: list) -> list:
     ts = []
     for name, name_en in tags:
         try:
-            t = Tags.objects.get(name=name)
-        except Tags.DoesNotExist:
-            t = Tags(name=name, name_en=name_en)
+            t = Tag.objects.get(name=name)
+        except Tag.DoesNotExist:
+            t = Tag(name=name, name_en=name_en)
             t.save()
         finally:
             ts.append(t.id)
@@ -69,7 +69,7 @@ def update_base_info():
                 g.tmodify = get_timestamp()
                 g.tuinfo = get_timestamp() + INFO_PERIOD
                 g.visible = True
-                g.tags.set(gen_tags_list(info.get('tags', [])))
+                g.tags.set(gen_tag_list(info.get('tags', [])))
                 g.develop.set(gen_company_list(info.get('develop', [])))
                 g.publish.set(gen_company_list(info.get('publish', [])))
                 g.cupdate+=1

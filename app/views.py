@@ -3,20 +3,19 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 18:04:10
+# @LastEditTime : 2020-12-20 01:13:37
 # @Description  : 视图函数
 '''
 from sys import argv
 from django.conf import settings
 from django.http.response import Http404, HttpResponse, JsonResponse
-from rest_framework import viewsets
+from rest_framework import views, viewsets
 from rest_framework.response import Response
+from rest_framework import permissions
 # from django.contrib import requests
-from app.serializers import GameInfoSerializer, TagsSerializer, CompanySerializer
+from app.serializers import GameInfoSerializer, TagSerializer, CompanySerializer
 
-from .models import GameInfo, Tags, Company
-
-from .spider.itad import get_plains, get_prices, Session
+from .models import GameInfo, Tag, Company
 
 from .updater import update_base_info
 
@@ -81,6 +80,13 @@ class CompantViewSet(viewsets.ModelViewSet):
     serializer_class = CompanySerializer
 
 
-class TagsViewSet(viewsets.ModelViewSet):
-    queryset = Tags.objects.all()
-    serializer_class = TagsSerializer
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+class AdvGameInfoViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsAdminUser,)
+
+
+class AdvGameInfoViewSet(viewsets.ModelViewSet):
+    permission_classes = (permissions.IsAdminUser,)

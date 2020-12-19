@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 18:38:15
+# @LastEditTime : 2020-12-20 00:51:35
 # @Description  : 数据库模型
 '''
 
@@ -20,7 +20,7 @@ class Status(models.Model):
                                 verbose_name='数值', help_text='项目的数值')
 
 
-class Tags(models.Model):
+class Tag(models.Model):
     '''标签'''
     id = models.AutoField(primary_key=True, unique=True, db_index=True,
                           verbose_name='标签ID', help_text='标签ID',)
@@ -59,28 +59,45 @@ class Company(models.Model):
         verbose_name_plural = verbose_name
 
 
+class GameAddList(models.Model):
+    '''等待添加的游戏'''
+    appid = models.IntegerField(primary_key=True, unique=True,
+                                verbose_name='appid', help_text='游戏的AppID')
+    tadd = models.IntegerField(default=0, db_index=True,
+                               verbose_name='添加时间', help_text='添加时间戳')
+
+
+class GameBanList(models.Model):
+    '''无效的游戏'''
+    appid = models.IntegerField(primary_key=True, unique=True,
+                                verbose_name='appid', help_text='游戏的AppID')
+    tadd = models.IntegerField(default=0, db_index=True,
+                               verbose_name='添加时间', help_text='添加时间戳')
+
+
 class GameInfo(models.Model):
     '''游戏信息'''
     TYPES = (('', '-'), ('G', '游戏'), ('S', '软件'), ('D', 'DLC'), ('V', '视频'))
     SOURCE = (('', '-'), ('S', 'Steam'), ('K', 'Keylol'))
+    LOWTYPE = (('', '-'), ('N', '近史低'))
     appid = models.IntegerField(primary_key=True, unique=True, db_index=True,
                                 verbose_name='appid', help_text='游戏的AppID')
     gtype = models.CharField(default='', max_length=1,  choices=TYPES,
                              verbose_name='类型', help_text='商店分类')
     source = models.CharField(default='', max_length=1,  choices=SOURCE,
                               verbose_name='来源', help_text='数据来源')
-    eupdate = models.BooleanField(default=True,db_index=True,
+    eupdate = models.BooleanField(default=True, db_index=True,
                                   verbose_name='启用更新', help_text='是否自动更新,错误次数超过设定自动禁用')
-    visible = models.BooleanField(default=False,db_index=True,
-                                  verbose_name='数据可见', help_text='数据是否可被查看')
     card = models.BooleanField(default=False,
                                verbose_name="卡牌", help_text='有无卡牌')
+    limit = models.BooleanField(default=False,
+                                verbose_name="受限", help_text='是否受限(无法+1)')
     adult = models.BooleanField(default=False,
                                 verbose_name="仅限成人", help_text='是否被标记为仅限成人')
     free = models.BooleanField(default=False,
                                verbose_name='免费', help_text='是否为免费游戏')
     release = models.BooleanField(default=False,
-                                  verbose_name='发行', help_text='是否已发行')
+                                  verbose_name='已发行', help_text='是否已发行')
     rscore = models.SmallIntegerField(default=0,
                                       verbose_name='评价', help_text='评测分数0-10')
     rtotal = models.IntegerField(default=0,
@@ -119,7 +136,7 @@ class GameInfo(models.Model):
     cerror = models.IntegerField(default=0,
                                  verbose_name='出错', help_text='出错计数器')
 
-    tags = models.ManyToManyField(Tags, related_name='tags', blank=True,
+    tags = models.ManyToManyField(Tag, related_name='tags', blank=True,
                                   verbose_name='标签', help_text='游戏标签')
     develop = models.ManyToManyField(Company, related_name='develop', blank=True,
                                      verbose_name='开发商', help_text='开发商')
@@ -138,3 +155,15 @@ class GameInfo(models.Model):
 
     class Meta:
         ordering = ('appid',)
+
+
+class AccessStatus(models.Model):
+    '''访问统计'''
+    count = models.IntegerField(default=1,
+                                verbose_name='访问次数', help_text='访问次数')
+    ban = models.BooleanField(default=False,
+                              verbose_name='封禁', help_text='禁止访问')
+    ip = models.CharField(max_length=45,
+                          verbose_name='IP地址', help_text='访问IP')
+    path = models.CharField(max_length=50, default='',
+                            verbose_name='访问路由', help_text='访问路由')
