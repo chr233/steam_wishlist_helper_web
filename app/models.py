@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 21:42:18
+# @LastEditTime : 2020-12-21 00:38:30
 # @Description  : 数据库模型
 '''
 
@@ -16,7 +16,7 @@ class AccessStats(models.Model):
                                 verbose_name='访问次数', help_text='访问次数')
     ban = models.BooleanField(default=False,
                               verbose_name='封禁', help_text='禁止访问')
-    ip = models.CharField(max_length=45, db_index=True, unique=True,
+    ip = models.CharField(max_length=50, db_index=True, unique=True,
                           verbose_name='IP地址', help_text='访问IP')
     path = models.CharField(max_length=50, default='',
                             verbose_name='访问路由', help_text='访问路由')
@@ -26,9 +26,9 @@ class Company(models.Model):
     '''发行商或者发行商'''
     id = models.AutoField(primary_key=True, unique=True, db_index=True,
                           verbose_name='公司ID', help_text='公司ID',)
-    name = models.CharField(max_length=50, unique=True, db_index=True,
+    name = models.CharField(max_length=200, unique=True, db_index=True,
                             verbose_name='公司名', help_text='公司名称')
-    desc = models.CharField(max_length=50, default='',
+    desc = models.CharField(max_length=200, default='',
                             verbose_name='备注', help_text='公司备注')
 
     def __str__(self) -> str:
@@ -49,7 +49,7 @@ class Tag(models.Model):
                           verbose_name='标签ID', help_text='标签ID',)
     name = models.CharField(max_length=50, unique=True, db_index=True,
                             verbose_name='中文名', help_text='标签中文名')
-    name_en = models.CharField(max_length=50, unique=True,
+    name_en = models.CharField(max_length=50,
                                verbose_name='英文名', help_text='标签英文名')
 
     def __str__(self) -> str:
@@ -97,7 +97,7 @@ class GameBanList(models.Model):
 
 class GameInfo(models.Model):
     '''游戏信息'''
-    TYPES = (('', '-'), ('G', '游戏'), ('S', '软件'), ('D', 'DLC'), ('V', '视频'))
+    TYPES = (('', '-'), ('G', 'Game'), ('S', 'Software'), ('D', 'DLC'), ('V', 'Video'))
     SOURCE = (('', '-'), ('S', 'Steam'), ('K', 'Keylol'))
     appid = models.IntegerField(primary_key=True, unique=True,
                                 verbose_name='appid', help_text='游戏的AppID')
@@ -162,9 +162,9 @@ class GameInfo(models.Model):
     publish = models.ManyToManyField(Company, related_name='publish', blank=True,
                                      verbose_name='发行商', help_text='发行商')
 
-    name = models.CharField(default='', max_length=100,
+    name = models.CharField(default='', max_length=150,
                             verbose_name='英文名', help_text='游戏英文名')
-    name_cn = models.CharField(default='', max_length=100,
+    name_cn = models.CharField(default='', max_length=150,
                                verbose_name='中文名', help_text='游戏中文名')
     plains = models.CharField(default='', max_length=200,
                               verbose_name='PlainID', help_text='查询价格数据需要用到')

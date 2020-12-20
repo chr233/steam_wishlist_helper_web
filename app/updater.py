@@ -27,6 +27,25 @@ def __gen_tag_list(tags: list) -> list:
     return ts
 
 
+def __gen_tag_list_k(tags: list) -> list:
+    '''生成标签列表'''
+    ts = []
+    for name, _ in tags:
+        try:
+            t = Tag.objects.get(name=name)
+        except Tag.DoesNotExist:
+            try:
+                t = Tag.objects.get(name_en=name)
+            except Tag.DoesNotExist:
+                print_log(f'未找到标签{name}')
+                continue
+                # t = Tag(name=name, name_en=name_en)
+                # t.save()
+        finally:
+            ts.append(t.id)
+    return ts
+
+
 def __gen_company_list(tags: list) -> list:
     '''生成发行商/开发商列表'''
     cs = []
@@ -41,10 +60,72 @@ def __gen_company_list(tags: list) -> list:
     return cs
 
 
+def __modify_game_info(appid, info, g: GameInfo = None):
+    '''修改模型字段'''
+    try:
+        if not g:
+            try:
+                g = GameInfo.objects.get(appid=appid)
+            except GameInfo.DoesNotExist:
+                g = GameInfo(appid=appid)
+                g.save()
+        g.name = info.get('name', g.name)
+        g.name_cn = info.get('name_cn', g.name_cn)
+        g.gtype = info.get('gtype', g.gtype)
+        g.source = info.get('source', g.source)
+        g.card = info.get('card', g.card)
+        g.limit = info.get('card', g.limit)
+        g.adult = info.get('adult', g.adult)
+        g.release = info.get('release', g.release)
+        g.rscore = info.get('rscore', g.rscore)
+        g.rtotal = info.get('rtotal', g.rtotal)
+        g.rpercent = info.get('rpercent', g.rpercent)
+        g.trelease = info.get('trelease', g.trelease)
+        g.tmodify = get_timestamp()
+        g.tuinfo = get_timestamp() + INFO_PERIOD
+        t = info.get('tags')
+        if t:
+            if g.source == 'S':
+                g.tags.set(__gen_tag_list(t))
+            elif g.source == 'K':
+                g.tags.set(__gen_tag_list_k(t))
+        d = info.get('develop')
+        if d:
+            g.develop.set(__gen_company_list(d))
+        p = info.get('publish')
+        if p:
+            g.publish.set(__gen_company_list(p))
+        g.cupdate += 1
+        return g
+    except Exception as e:
+        print_log(f'出错了 {e}')
+
+
+def __modify_game_price(appid, price, g: GameInfo = None):
+    '''修改模型字段'''
+    if not g:
+        try:
+            g = GameInfo.objects.get(appid=appid)
+        except GameInfo.DoesNotExist:
+            g = GameInfo(appid=appid)
+    g.free = price.get('free', g.free)
+    g.pcurrent = price.get('pcurrent', g.pcurrent)
+    g.porigin = price.get('porigin', g.porigin)
+    g.pcut = price.get('pcut', g.source)
+    g.plowest = price.get('plowest', g.card)
+    g.plowestcut = price.get('plowestcut', g.limit)
+    g.tlowest = price.get('tlowest', g.adult)
+    g.tmodify = get_timestamp()
+    g.tuprice = get_timestamp() + INFO_PERIOD
+    g.cupdate += 1
+    return g
+
+
 def add_new_games():
     '''添加新游戏'''
-    print_log('开始执行任务')
-    qs = GameAddList.objects.all()[:10]
+    print_log('添加新游戏')
+    qs = GameAddList.objects.all()[:500]
+    print_log(f'开始执行任务,共{len(qs)}个游戏')
     ss = Session()
     for ag in qs:
         appid = ag.appid
@@ -77,7 +158,7 @@ def add_new_games():
                 maxid = g.appid
             except GameInfo.DoesNotExist:
                 maxid = 9999999
-            if appid > maxid:
+            if appid < maxid:
                 print_log(f'app {appid} 被禁用')
                 bg = GameBanList(appid=appid, tadd=get_timestamp(),
                                  cview=ag.cview, cerror=ag.cerror)
@@ -88,59 +169,11 @@ def add_new_games():
                 ag.save()
 
 
-def __modify_game_info(appid, info, g: GameInfo = None):
-    '''修改模型字段'''
-    if not g:
-        try:
-            g = GameInfo.objects.get(appid=appid)
-        except GameInfo.DoesNotExist:
-            g = GameInfo(appid=appid)
-    g.name = info.get('name', g.name)
-    g.name_cn = info.get('name_cn', g.name_cn)
-    g.gtype = info.get('gtype', g.gtype)
-    g.source = info.get('source', g.source)
-    g.card = info.get('card', g.card)
-    g.limit = info.get('card', g.limit)
-    g.adult = info.get('adult', g.adult)
-    g.release = info.get('release', g.release)
-    g.rscore = info.get('rscore', g.rscore)
-    g.rtotal = info.get('rtotal', g.rtotal)
-    g.rpercent = info.get('rpercent', g.rpercent)
-    g.trelease = info.get('trelease', g.trelease)
-    g.tmodify = get_timestamp()
-    g.tuinfo = get_timestamp() + INFO_PERIOD
-    g.tags.set(__gen_tag_list(info.get('tags', [])))
-    g.develop.set(__gen_company_list(info.get('develop', [])))
-    g.publish.set(__gen_company_list(info.get('publish', [])))
-    g.cupdate += 1
-    return g
-
-
-def __modify_game_price(appid, price, g: GameInfo = None):
-    '''修改模型字段'''
-    if not g:
-        try:
-            g = GameInfo.objects.get(appid=appid)
-        except GameInfo.DoesNotExist:
-            g = GameInfo(appid=appid)
-    g.free = price.get('free', g.free)
-    g.pcurrent = price.get('pcurrent', g.pcurrent)
-    g.porigin = price.get('porigin', g.porigin)
-    g.pcut = price.get('pcut', g.source)
-    g.plowest = price.get('plowest', g.card)
-    g.plowestcut = price.get('plowestcut', g.limit)
-    g.tlowest = price.get('tlowest', g.adult)
-    g.tmodify = get_timestamp()
-    g.tuprice = get_timestamp() + INFO_PERIOD
-    g.cupdate += 1
-    return g
-
-
 def update_current_games_info():
     '''更新现有游戏'''
-    print_log('开始执行任务')
+    print_log('更新游戏基本信息')
     ts = get_timestamp()
-    qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[:10]
+    qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[:50]
     ss = Session()
     print_log(f'开始执行任务,共{len(qs)}个游戏')
     for g in qs:
@@ -171,9 +204,9 @@ def update_current_games_info():
 
 def update_current_games_price():
     '''更新现有游戏'''
-    print_log('开始执行任务')
+    print_log('更新游戏价格信息')
     ts = get_timestamp()
-    qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[:10]
+    qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[:50]
     ss = Session()
     print_log(f'开始执行任务,共{len(qs)}个游戏')
 

@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-06-21 15:41:24
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 20:28:07
+# @LastEditTime : 2020-12-21 00:20:21
 # @Description  : 爬取Steam商店信息
 '''
 
@@ -11,6 +11,7 @@ from re import findall
 from time import strptime, mktime
 from bs4 import BeautifulSoup
 from requests import Session
+from soupsieve import select
 
 from .static import URLs, Norst, AppNotFound, STEAM_COOKIES_CN, STEAM_COOKIES_EN
 from .basic import print_log, retry_get
@@ -48,7 +49,8 @@ def get_game_info(session: Session, appid: int):
     soup_cn = __get_soup(session=session, url=url, language='CN')
 
     # 锁区,需要登录,以及其他错误
-    emsg = (soup_cn.select_one('.error') or Norst).text
+    emsg = (soup_cn.select_one('.error')
+            or soup_cn.select_one('#error_box') or Norst).text
     if emsg != '':
         print_log(f'读取APP {appid} 出错 {emsg}')
         return None  # 返回空值,通过其他方式获取信息
@@ -86,12 +88,23 @@ def get_game_info(session: Session, appid: int):
     t_en = [x.text.strip() for x in info_en.select('a.app_tag') or []]
     t_cn = [x.text.strip() for x in info_cn.select('a.app_tag') or []]
     tags = list(dict(zip(t_cn, t_en)).items())
+
     # 是否已发行
-    release = not(soup_en.select_one('.not_yet'))
+    release = not(bool(soup_en.select_one('.not_yet')) or bool(
+        soup_en.select_one('div.game_area_comingsoon')))
+
+    # 发行日期
+    tr = info_cn.select_one('.date') or Norst
+    trelease = 0
+
     if release:
-        # 发行日期
-        tr = info_cn.select_one('.date')
-        trelease = int(mktime(strptime(tr.text, '%Y年%m月%d日')))
+        try:
+            trelease = int(mktime(strptime(tr.text, '%Y年%m月%d日')))
+        except Exception:
+            print_log(f'app {appid} 读取发型日期出错 {tr.text}')
+            release = False
+
+    if release:
         # 用户评测信息
         r = info_cn.select_one('meta[itemprop="reviewCount"]') or {
             'content': 0}

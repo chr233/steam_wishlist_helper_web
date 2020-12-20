@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-06-30 05:08:57
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 20:27:40
+# @LastEditTime : 2020-12-20 22:07:10
 # @Description  : 对接Keylol的API接口
 '''
 
@@ -93,7 +93,7 @@ def get_game_info(session: Session, appid: int) -> dict:
             rpercent = 0
             trelease = 0
     else:
-        print_log(f'读取APP {appid} 出错')
+        print_log(f'读取app {appid} 出错')
         return None
 
     return {'name': name, 'name_cn': name_cn,

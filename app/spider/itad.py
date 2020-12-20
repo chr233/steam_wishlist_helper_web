@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-07-08 19:48:26
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 21:58:09
+# @LastEditTime : 2020-12-20 22:57:41
 # @Description  : 对接ITAD的API接口
 '''
 
@@ -58,8 +58,8 @@ def __get_current_prices(session: Session, plains: list) -> dict:
         data = jd.get('data', {})
         for plain in data.keys():
             d = data[plain].get('list', [])
-            if len(d) > 1:
-                print_log(f'{plain} {d}')
+            # if len(d) > 1:
+            #     print_log(f'{plain} {d}')
             if d:
                 p_new = d[0]['price_new']
                 p_old = d[0]['price_old']

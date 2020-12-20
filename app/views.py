@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 21:09:37
+# @LastEditTime : 2020-12-20 22:03:43
 # @Description  : 视图函数
 '''
 from requests.sessions import session
@@ -30,7 +30,8 @@ TIME_DECREASE = settings.SWH_SETTINGS['TIME_DECREASE']
 def test(requests):
     # permission_classes = (permissions.IsAdminUser,)
     # ss=session()
-    # add_new_games()
+    add_new_games()
+    update_current_games_info()
     update_current_games_price()
     return HttpResponse('done')
 
