@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-06-30 05:08:57
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 17:17:50
+# @LastEditTime : 2020-12-20 20:27:40
 # @Description  : 对接Keylol的API接口
 '''
 
@@ -11,7 +11,8 @@ from time import strptime, mktime
 from requests import Session
 
 from .static import URLs
-from .basic import retry_get_json_keylol,print_log
+from .basic import retry_get_json_keylol, print_log
+
 
 def calc_rscore(total: int, percent: int):
     if total < 10:
@@ -67,8 +68,11 @@ def get_game_info(session: Session, appid: int) -> dict:
         if name == '无法显示游戏信息':
             print_log(f'读取APP {appid} 出错')
             return None
+        gtype = 'G'  # TODO API未提供相关信息
         card = bool(jd.get('card'))
         adult = False
+        cate = [x[0] for x in jd.get('categories', [])]
+        limit = 'learning' in cate
         tags = [(x, '')for x in jd.get('tags', [])]
         develop = jd.get('developer', [])
         publish = jd.get('publisher', [])
@@ -92,7 +96,10 @@ def get_game_info(session: Session, appid: int) -> dict:
         print_log(f'读取APP {appid} 出错')
         return None
 
-    return {'name': name, 'name_cn': name_cn, 'source': 2, 'card': card,
-            'adult': adult, 'release': release, 'rscore': rscore,
-            'rtotal': rtotal, 'rpercent': rpercent, 'trelease': trelease,
+    return {'name': name, 'name_cn': name_cn,
+            'gtype': gtype, 'source': 'K',
+            'card': card, 'limit': limit,
+            'adult': adult, 'release': release,
+            'rscore': rscore, 'rtotal': rtotal,
+            'rpercent': rpercent, 'trelease': trelease,
             'tags': tags, 'develop': develop, 'publish': publish}

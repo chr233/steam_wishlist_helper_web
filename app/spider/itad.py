@@ -30,23 +30,25 @@ def __api_interface(session: Session, url: str, params: dict):
 def get_plains(session: Session, ids: list) -> dict:
     '''把appid转换成IsThereAnyDeal使用的plainid'''
     url = URLs.ITAD_ID_To_Plain
-    params = {'shop': 'steam',
-              'ids': ','.join([f'app/{x}' for x in ids])}
-    result = {}
-    jd = __api_interface(session=session, url=url, params=params)
-    if jd:
-        data = jd.get('data', {})
-        for id_ in ids:
-            plain = data.get(f'app/{id_}', None)
-            if plain:
-                result[id_] = plain
-            else:
-                # result[id_] = ''
-                print_log(f'读取App{id_}出错')
+    result={}
+    subs = [ids[i:i+5] for i in range(0, len(ids), 5)]
+    for sub in subs:
+        params = {'shop': 'steam',
+              'ids': ','.join([f'app/{x}' for x in sub])}
+        jd = __api_interface(session=session, url=url, params=params)
+        if jd:
+            data = jd.get('data', {})
+            for id_ in ids:
+                plain = data.get(f'app/{id_}', None)
+                if plain:
+                    result[id_] = plain
+                else:
+                    # result[id_] = ''
+                    print_log(f'读取App{id_}出错')
     return result
 
 
-def get_current_prices(session: Session, plains: list) -> dict:
+def __get_current_prices(session: Session, plains: list) -> dict:
     '''获取Steam商店当前价格'''
     params = {'plains': ','.join(plains), 'shops': 'steam',
               'country': COUNTRY, 'region': REGION}
@@ -70,7 +72,7 @@ def get_current_prices(session: Session, plains: list) -> dict:
     return result
 
 
-def get_lowest_prices(session: Session, plains: list) -> dict:
+def __get_lowest_prices(session: Session, plains: list) -> dict:
     '''获取Steam商店史低价格'''
     params = {'plains': ','.join(plains), 'shops': 'steam',
               'country': COUNTRY, 'region': REGION}
@@ -96,8 +98,8 @@ def get_prices(plains: list) -> dict:
     subs = [plains[i:i+4] for i in range(0, len(plains), 4)]
     result = {}
     for sub in subs:
-        current = get_current_prices(sub)
-        lowest = get_lowest_prices(sub)
+        current = __get_current_prices(sub)
+        lowest = __get_lowest_prices(sub)
         for p in sub:
             p_new, p_old, p_cut = current.get(p) or [-1, -1, 0]
             p_low, p_lcut, p_time = lowest.get(p) or [-1, 0, 0]

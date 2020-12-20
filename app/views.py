@@ -3,9 +3,10 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 02:30:05
+# @LastEditTime : 2020-12-20 21:09:37
 # @Description  : 视图函数
 '''
+from requests.sessions import session
 from app.spider.basic import get_timestamp
 from sys import argv
 from django.conf import settings
@@ -17,17 +18,20 @@ from rest_framework import permissions
 from app.serializers import GameSimpleInfoSerializer, GameFullInfoSerializer, GameBanListSerializer, GameAddListSerializer
 from app.serializers import TagSerializer, CompanySerializer, StatusSerializer, AccessStatsSerializer
 
+from app.spider.keylol import get_game_info,Session
+
 from .models import AccessStats, GameInfo, GameAddList, GameBanList, Tag, Company
 
-from .updater import update_base_info
+from .updater import add_new_games, update_current_games_info, update_current_games_price
 
 TIME_DECREASE = settings.SWH_SETTINGS['TIME_DECREASE']
 
 
 def test(requests):
-    permission_classes = (permissions.IsAdminUser,)
-    update_base_info()
-
+    # permission_classes = (permissions.IsAdminUser,)
+    # ss=session()
+    # add_new_games()
+    update_current_games_price()
     return HttpResponse('done')
 
 
@@ -74,7 +78,7 @@ class GameSimpleInfoViewSet(viewsets.ModelViewSet):
                 pk = int(kwargs['pk'])
             except ValueError:
                 raise Http404
-            if pk <= 0:
+            if pk >= 0:
                 try:
                     bangame = GameBanList.objects.get(appid=pk)
                     bangame.cview += 1

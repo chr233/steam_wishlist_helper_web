@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:24:13
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 02:22:50
+# @LastEditTime : 2020-12-20 21:16:31
 # @Description  : 序列化器
 '''
 
@@ -30,21 +30,17 @@ class CompanySerializer(serializers.ModelSerializer):
 
 
 class GameAddListSerializer(serializers.ModelSerializer):
+    appid=serializers.IntegerField()
     class Meta:
         model = GameAddList
-        fields = ['id', 'appid', 'tadd', 'cview']
-        extra_kwargs = {
-            'id': {'read_only': True},
-        }
+        fields = ['appid', 'tadd', 'cview']
 
 
 class GameBanListSerializer(serializers.ModelSerializer):
+    appid=serializers.IntegerField()
     class Meta:
         model = GameBanList
-        fields = ['id', 'appid', 'tadd', 'cview']
-        extra_kwargs = {
-            'id': {'read_only': True},
-        }
+        fields = ['appid', 'tadd', 'cview']
 
 
 class GameSimpleInfoSerializer(serializers.ModelSerializer):
@@ -62,6 +58,7 @@ class GameSimpleInfoSerializer(serializers.ModelSerializer):
 
 
 class GameFullInfoSerializer(serializers.ModelSerializer):
+    appid=serializers.IntegerField()
     class Meta:
         model = GameInfo
         fields = ['appid', 'name', 'name_cn', 'gtype', 'source',
@@ -70,9 +67,6 @@ class GameFullInfoSerializer(serializers.ModelSerializer):
                   'pcurrent', 'porigin', 'plowest', 'pcut', 'plowestcut',
                   'tadd', 'trelease', 'tlowest', 'tmodify', 'tuprice', 'tuinfo',
                   'cview', 'cupdate', 'cerror', 'tags',  'develop',  'publish']
-        extra_kwargs = {
-            'appid': {'read_only': True},
-        }
 
 
 class StatusSerializer(serializers.ModelSerializer):

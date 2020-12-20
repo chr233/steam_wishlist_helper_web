@@ -7,11 +7,11 @@
 # @Description  : 定时调度器
 '''
 
-from .updater import update_base_info
+from .updater import add_new_games
 
 def flush_steam_info():
     # 具体要执行的代码
-    update_base_info()
+    add_new_games()
 
 
 def flush_price_info():

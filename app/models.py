@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 02:23:58
+# @LastEditTime : 2020-12-20 20:13:42
 # @Description  : 数据库模型
 '''
 
@@ -67,8 +67,10 @@ class GameAddList(models.Model):
                                 verbose_name='appid', help_text='游戏的AppID')
     tadd = models.IntegerField(default=0,
                                verbose_name='添加时间', help_text='添加时间戳')
-    cview = models.IntegerField(default=1,
+    cview = models.IntegerField(default=0,
                                 verbose_name='访问次数', help_text='访问次数')
+    cerror = models.IntegerField(default=0,
+                                 verbose_name='出错次数', help_text='出错次数')
 
     class Meta:
         ordering = ('tadd',)
@@ -84,6 +86,8 @@ class GameBanList(models.Model):
                                verbose_name='添加时间', help_text='添加时间戳')
     cview = models.IntegerField(default=0,
                                 verbose_name='访问次数', help_text='访问次数')
+    cerror = models.IntegerField(default=0,
+                                 verbose_name='出错次数', help_text='出错次数')
 
     class Meta:
         ordering = ('appid',)

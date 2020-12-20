@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-06-21 15:41:24
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 17:17:22
+# @LastEditTime : 2020-12-20 20:28:07
 # @Description  : 爬取Steam商店信息
 '''
 
@@ -16,8 +16,7 @@ from .static import URLs, Norst, AppNotFound, STEAM_COOKIES_CN, STEAM_COOKIES_EN
 from .basic import print_log, retry_get
 
 
-
-def get_store_soup(session: Session, url: str, language: str = 'CN') -> BeautifulSoup:
+def __get_soup(session: Session, url: str, language: str = 'CN') -> BeautifulSoup:
     cookies = STEAM_COOKIES_EN if language == 'EN' else STEAM_COOKIES_CN
     resp = retry_get(session=session, url=url, cookies=cookies)
     if resp:
@@ -28,10 +27,25 @@ def get_store_soup(session: Session, url: str, language: str = 'CN') -> Beautifu
         return None
 
 
+def __judge_type(strlist: list) -> int:
+    '''判断游戏类型'''
+    if 'All Games' in strlist:
+        if 'Downloadable Content' not in strlist:
+            return 'G'
+        else:
+            return 'D'
+    elif 'All Software' in strlist:
+        return 'S'
+    elif 'All Videos' in strlist:
+        return 'V'
+    else:
+        return ''
+
+
 def get_game_info(session: Session, appid: int):
     url = URLs.Steam_Store_App % appid
-    soup_en = get_store_soup(session=session, url=url, language='EN')
-    soup_cn = get_store_soup(session=session, url=url, language='CN')
+    soup_en = __get_soup(session=session, url=url, language='EN')
+    soup_cn = __get_soup(session=session, url=url, language='CN')
 
     # 锁区,需要登录,以及其他错误
     emsg = (soup_cn.select_one('.error') or Norst).text
@@ -48,9 +62,15 @@ def get_game_info(session: Session, appid: int):
         print_log(f'读取APP {appid} 出错')
         raise AppNotFound(f'读取APP {appid} 出错')
 
-    c = soup_cn.select_one('#category_block img[src$="ico_cards.png"]')
-    card = bool(c or False)
+    bgs = [x.text for x in (soup_en.select('.blockbg>a') or [])]
+    gtype = __judge_type(bgs)
 
+    category = soup_cn.select_one('#category_block')
+    if category:
+        card = bool(category.select_one('img[src$="ico_cards.png"]'))
+        limit = bool(category.select_one('div.learning_about'))
+    else:
+        card = limit = False
     # 是否锁偏好
     adult = bool(soup_cn.select_one('.mature_content_notice'))
 
@@ -89,7 +109,10 @@ def get_game_info(session: Session, appid: int):
         rpercent = 0
         trelease = 0
 
-    return {'name': name, 'name_cn': name_cn, 'source': 1, 'card': card,
-            'adult': adult, 'release': release, 'rscore': rscore,
-            'rtotal': rtotal, 'rpercent': rpercent, 'trelease': trelease,
+    return {'name': name, 'name_cn': name_cn,
+            'gtype': gtype, 'source': 'S',
+            'card': card, 'limit': limit,
+            'adult': adult, 'release': release,
+            'rscore': rscore, 'rtotal': rtotal,
+            'rpercent': rpercent,  'trelease': trelease,
             'tags': tags, 'develop': develop, 'publish': publish}

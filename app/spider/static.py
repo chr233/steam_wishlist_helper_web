@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-05-03 23:20:00
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 12:46:21
+# @LastEditTime : 2020-12-20 18:30:43
 # @Description  : 静态常量
 '''
 
@@ -96,13 +96,6 @@ Num2Review = {
     9: '好评如潮'
 }
 
-GameType2Num = {
-    'Error': 0,
-    'Game': 1,
-    'Application': 2,
-    'DLC': 3,
-    'Video': 4
-}
 Num2GameType = {
     0: '【解析错误】',
     1: '游戏',

@@ -1,9 +1,10 @@
 from django.conf import settings
 
-from .models import GameInfo, Tag, Company
+from .models import GameInfo, Tag, Company, GameAddList, GameBanList
 from .spider.basic import get_timestamp, Session
 from .spider.steam import get_game_info as steam_info
 from .spider.keylol import get_game_info as keylol_info
+from .spider.itad import get_plains, get_prices
 from .spider.static import AppNotFound
 from .spider.basic import print_log
 
@@ -12,7 +13,8 @@ PRICE_PERIOD = settings.SWH_SETTINGS['PRICE_UPDATE_PERIOD']
 MAX_ERROR = settings.SWH_SETTINGS['MAX_ERROR']
 
 
-def gen_tag_list(tags: list) -> list:
+def __gen_tag_list(tags: list) -> list:
+    '''生成标签列表'''
     ts = []
     for name, name_en in tags:
         try:
@@ -25,7 +27,8 @@ def gen_tag_list(tags: list) -> list:
     return ts
 
 
-def gen_company_list(tags: list) -> list:
+def __gen_company_list(tags: list) -> list:
+    '''生成发行商/开发商列表'''
     cs = []
     for name in tags:
         try:
@@ -38,45 +41,136 @@ def gen_company_list(tags: list) -> list:
     return cs
 
 
-def update_base_info():
+def add_new_games():
+    '''添加新游戏'''
     print_log('开始执行任务')
-    ts = get_timestamp()
-    qs = GameInfo.objects.filter(tuinfo__lte=ts, eupdate=True)[:10]
-    for g in qs:
-        appid = g.appid
-        ss = Session()
+    qs = GameAddList.objects.all()[:10]
+    ss = Session()
+    for ag in qs:
+        appid = ag.appid
         try:
             print_log(f'开始处理app {appid} 信息')
             info = steam_info(ss, appid) or keylol_info(ss, appid)
-            if not info:
+            if info:
+                print_log(f'app {appid} 信息读取成功')
+                # print_log(f'app {appid} {info}')
+                try:
+                    g = __modify_game_info(appid, info, None)
+                    g.save()
+                    ag.delete()
+                except Exception:
+                    print_log(f'app {appid} 修改失败')
+                    ag.cerror += 1
+                    ag.save()
+            else:
+                # 所有渠道都获取失败
+                print_log(f'app {appid} 信息获取失败')
+                ag.cerror += 1
+                if ag.cerror >= MAX_ERROR:
+                    raise AppNotFound
+                else:
+                    ag.save()
+        except AppNotFound:
+            # 下架或者被ban
+            try:
+                g = GameInfo.objects.all().last()
+                maxid = g.appid
+            except GameInfo.DoesNotExist:
+                maxid = 9999999
+            if appid > maxid:
+                print_log(f'app {appid} 被禁用')
+                bg = GameBanList(appid=appid, tadd=get_timestamp(),
+                                 cview=ag.cview, cerror=ag.cerror)
+                bg.save()
+                ag.delete()
+            else:
+                ag.tadd = get_timestamp() + INFO_PERIOD
+                ag.save()
+
+
+def update_current_games_info():
+    '''更新现有游戏'''
+    print_log('开始执行任务')
+    ts = get_timestamp()
+    qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[:10]
+    ss = Session()
+    print_log(f'开始执行任务,共{len(qs)}个游戏')
+    for g in qs:
+        appid = g.appid
+        try:
+            print_log(f'开始处理app {appid} 信息')
+            info = steam_info(ss, appid) or keylol_info(ss, appid)
+            if info:
+                print_log(f'app {appid} 信息读取成功')
+                # print_log(f'app {appid} {info}')
+                try:
+                    __modify_game_info(appid, info, g)
+                except Exception:
+                    print_log(f'app {appid} 修改失败')
+                    g.cerror += 1
+            else:
                 # 所有渠道都获取失败
                 print_log(f'app {appid} 信息获取失败')
                 g.cerror += 1
                 if g.cerror >= MAX_ERROR:
-                    g.eupdate = False
-            else:
-                print_log(f'app {appid} {info}')
-                g.name = info.get('name')
-                g.name_cn = info.get('name_cn')
-                g.source = info.get('source', 0)
-                g.card = info.get('card', False)
-                g.adult = info.get('adult', False)
-                g.release = info.get('release', False)
-                g.rscore = info.get('rscore', 0)
-                g.rtotal = info.get('rtotal', 0)
-                g.rpercent = info.get('rpercent', 0)
-                g.trelease = info.get('trelease', 0)
-                g.tmodify = get_timestamp()
-                g.tuinfo = get_timestamp() + INFO_PERIOD
-                g.visible = True
-                g.tags.set(gen_tag_list(info.get('tags', [])))
-                g.develop.set(gen_company_list(info.get('develop', [])))
-                g.publish.set(gen_company_list(info.get('publish', [])))
-                g.cupdate+=1
+                    raise AppNotFound
         except AppNotFound:
             # 下架或者被ban
-            print_log(f'app {appid} 商店页不存在,停止自动更新')
+            print_log(f'app {appid} 禁用更新')
             g.eupdate = False
-            g.cerror += 1
         finally:
             g.save()
+
+
+def update_current_games_price():
+    '''更新现有游戏'''
+    print_log('开始执行任务')
+    ts = get_timestamp()
+    qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[:10]
+    ss = Session()
+    print_log(f'开始执行任务,共{len(qs)}个游戏')
+
+    a2p_map = {}  # appid和plains对照表
+    appidlist = []
+    for g in qs:  # 为没有plains的条目添加plains
+        plains = g.plains
+        appid = g.appid
+        if not plains:
+            appidlist.append(appid)
+        a2p_map[appid] = plains
+    newplains = get_plains(ss, appidlist)  # 获取plains
+    a2p_map.update(newplains)
+    vaildplains = filter(None, a2p_map.values())
+    pricesdic = get_prices(vaildplains)
+    for g in qs:
+        appid = g.appid
+        plains = a2p_map[appid]
+        p
+
+
+def __modify_game_info(appid, info, g: GameInfo = None):
+    '''修改模型字段'''
+    if not g:
+        try:
+            g = GameInfo.objects.get(appid=appid)
+        except GameInfo.DoesNotExist:
+            g = GameInfo(appid=appid)
+    g.name = info.get('name', g.name)
+    g.name_cn = info.get('name_cn', g.name_cn)
+    g.gtype = info.get('gtype', g.gtype)
+    g.source = info.get('source', g.source)
+    g.card = info.get('card', g.card)
+    g.limit = info.get('card', g.limit)
+    g.adult = info.get('adult', g.adult)
+    g.release = info.get('release', g.release)
+    g.rscore = info.get('rscore', g.rscore)
+    g.rtotal = info.get('rtotal', g.rtotal)
+    g.rpercent = info.get('rpercent', g.rpercent)
+    g.trelease = info.get('trelease', g.trelease)
+    g.tmodify = get_timestamp()
+    g.tuinfo = get_timestamp() + INFO_PERIOD
+    g.tags.set(__gen_tag_list(info.get('tags', [])))
+    g.develop.set(__gen_company_list(info.get('develop', [])))
+    g.publish.set(__gen_company_list(info.get('publish', [])))
+    g.cupdate += 1
+    return g

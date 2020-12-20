@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-15 00:35:49
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-18 17:15:04
+# @LastEditTime : 2020-12-20 21:20:32
 # @Description  : 带自动重试的请求器
 '''
 
@@ -16,8 +16,6 @@ from json import loads
 from requests import Session, Response
 
 from.static import HEADERS, TIMEOUT
-
-logger = getLogger('Basic')
 
 
 def get_timestamp():
@@ -43,12 +41,12 @@ def retry_get(session: Session, url: str, params: dict = None,
                 resp.encoding = 'utf-8'
                 return resp
         except Exception as e:
-            logger.warning(e)
+            print_log(e)
             if _ == 0:
-                logger.warning('网络错误,暂停3秒')
+                print_log('网络错误,暂停3秒')
                 sleep(3)
             else:
-                logger.warning('网络错误,暂停10秒')
+                print_log('网络错误,暂停10秒')
                 sleep(10)
 
 
@@ -67,14 +65,14 @@ def retry_get_json(session: Session, url: str, params: dict = None,
                 jd = resp.json()
                 return jd
         except JSONDecodeError:
-            logger.warning('JSON解析失败')
+            print_log('JSON解析失败')
         except Exception as e:
-            logger.warning(e)
+            print_log(e)
             if _ == 0:
-                logger.warning('网络错误,暂停3秒')
+                print_log('网络错误,暂停3秒')
                 sleep(3)
             else:
-                logger.warning('网络错误,暂停10秒')
+                print_log('网络错误,暂停10秒')
                 sleep(10)
     return {}
 
@@ -96,13 +94,13 @@ def retry_get_json_keylol(session: Session, url: str, params: dict = None,
                     jd = loads(raw[0])
                     return jd
         except JSONDecodeError:
-            logger.warning('JSON解析失败')
+            print_log('JSON解析失败')
         except Exception as e:
-            logger.warning(e)
+            print_log(e)
             if _ == 0:
-                logger.warning('网络错误,暂停3秒')
+                print_log('网络错误,暂停3秒')
                 sleep(3)
             else:
-                logger.warning('网络错误,暂停10秒')
+                print_log('网络错误,暂停10秒')
                 sleep(10)
     return {}
