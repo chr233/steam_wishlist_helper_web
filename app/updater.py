@@ -88,66 +88,6 @@ def add_new_games():
                 ag.save()
 
 
-def update_current_games_info():
-    '''更新现有游戏'''
-    print_log('开始执行任务')
-    ts = get_timestamp()
-    qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[:10]
-    ss = Session()
-    print_log(f'开始执行任务,共{len(qs)}个游戏')
-    for g in qs:
-        appid = g.appid
-        try:
-            print_log(f'开始处理app {appid} 信息')
-            info = steam_info(ss, appid) or keylol_info(ss, appid)
-            if info:
-                print_log(f'app {appid} 信息读取成功')
-                # print_log(f'app {appid} {info}')
-                try:
-                    __modify_game_info(appid, info, g)
-                except Exception:
-                    print_log(f'app {appid} 修改失败')
-                    g.cerror += 1
-            else:
-                # 所有渠道都获取失败
-                print_log(f'app {appid} 信息获取失败')
-                g.cerror += 1
-                if g.cerror >= MAX_ERROR:
-                    raise AppNotFound
-        except AppNotFound:
-            # 下架或者被ban
-            print_log(f'app {appid} 禁用更新')
-            g.eupdate = False
-        finally:
-            g.save()
-
-
-def update_current_games_price():
-    '''更新现有游戏'''
-    print_log('开始执行任务')
-    ts = get_timestamp()
-    qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[:10]
-    ss = Session()
-    print_log(f'开始执行任务,共{len(qs)}个游戏')
-
-    a2p_map = {}  # appid和plains对照表
-    appidlist = []
-    for g in qs:  # 为没有plains的条目添加plains
-        plains = g.plains
-        appid = g.appid
-        if not plains:
-            appidlist.append(appid)
-        a2p_map[appid] = plains
-    newplains = get_plains(ss, appidlist)  # 获取plains
-    a2p_map.update(newplains)
-    vaildplains = filter(None, a2p_map.values())
-    pricesdic = get_prices(vaildplains)
-    for g in qs:
-        appid = g.appid
-        plains = a2p_map[appid]
-        p
-
-
 def __modify_game_info(appid, info, g: GameInfo = None):
     '''修改模型字段'''
     if not g:
@@ -174,3 +114,96 @@ def __modify_game_info(appid, info, g: GameInfo = None):
     g.publish.set(__gen_company_list(info.get('publish', [])))
     g.cupdate += 1
     return g
+
+
+def __modify_game_price(appid, price, g: GameInfo = None):
+    '''修改模型字段'''
+    if not g:
+        try:
+            g = GameInfo.objects.get(appid=appid)
+        except GameInfo.DoesNotExist:
+            g = GameInfo(appid=appid)
+    g.free = price.get('free', g.free)
+    g.pcurrent = price.get('pcurrent', g.pcurrent)
+    g.porigin = price.get('porigin', g.porigin)
+    g.pcut = price.get('pcut', g.source)
+    g.plowest = price.get('plowest', g.card)
+    g.plowestcut = price.get('plowestcut', g.limit)
+    g.tlowest = price.get('tlowest', g.adult)
+    g.tmodify = get_timestamp()
+    g.tuprice = get_timestamp() + INFO_PERIOD
+    g.cupdate += 1
+    return g
+
+
+def update_current_games_info():
+    '''更新现有游戏'''
+    print_log('开始执行任务')
+    ts = get_timestamp()
+    qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[:10]
+    ss = Session()
+    print_log(f'开始执行任务,共{len(qs)}个游戏')
+    for g in qs:
+        appid = g.appid
+        try:
+            print_log(f'开始处理app {appid} 信息')
+            info = steam_info(ss, appid) or keylol_info(ss, appid)
+            if info:
+                print_log(f'app {appid} 信息读取成功')
+                # print_log(f'app {appid} {info}')
+                __modify_game_info(appid, info, g)
+            else:
+                # 所有渠道都获取失败
+                print_log(f'app {appid} 信息获取失败')
+                g.cerror += 1
+                if g.cerror >= MAX_ERROR:
+                    raise AppNotFound
+        except AppNotFound:
+            # 下架或者被ban,无数失败次数,直接禁用更新
+            print_log(f'app {appid} 禁用更新')
+            g.eupdate = False
+        finally:
+            try:
+                g.save()
+            except Exception:
+                print_log(f'app {appid} 保存失败')
+
+
+def update_current_games_price():
+    '''更新现有游戏'''
+    print_log('开始执行任务')
+    ts = get_timestamp()
+    qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[:10]
+    ss = Session()
+    print_log(f'开始执行任务,共{len(qs)}个游戏')
+
+    a2p_map = {}  # appid和plains对照表
+    appidlist = []
+    for g in qs:  # 为没有plains的条目添加plains
+        plains = g.plains
+        appid = g.appid
+        if not plains:
+            appidlist.append(appid)
+        a2p_map[appid] = plains
+    newplains = get_plains(ss, appidlist)  # 获取plains
+    a2p_map.update(newplains)
+    vaildplains = list(filter(None, a2p_map.values()))
+    pricesdic = get_prices(ss, vaildplains)
+    for g in qs:
+        appid = g.appid
+        plains = a2p_map[appid]
+        if plains in pricesdic:
+            price = pricesdic.get(plains)
+            g.plains = plains
+            __modify_game_price(appid, price, g)
+        else:
+            print_log(f'app {appid} 价格获取失败')
+            g.cerror += 1
+            g.plains = ''
+            if g.cerror >= MAX_ERROR:
+                print_log(f'app {appid} 禁用更新')
+                g.eupdate = False
+        try:
+            g.save()
+        except Exception:
+            print_log(f'app {appid} 保存失败')

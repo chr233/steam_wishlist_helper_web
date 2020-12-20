@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 20:13:42
+# @LastEditTime : 2020-12-20 21:42:18
 # @Description  : 数据库模型
 '''
 
@@ -99,7 +99,6 @@ class GameInfo(models.Model):
     '''游戏信息'''
     TYPES = (('', '-'), ('G', '游戏'), ('S', '软件'), ('D', 'DLC'), ('V', '视频'))
     SOURCE = (('', '-'), ('S', 'Steam'), ('K', 'Keylol'))
-    LOWTYPE = (('', '-'), ('N', '近史低'))
     appid = models.IntegerField(primary_key=True, unique=True,
                                 verbose_name='appid', help_text='游戏的AppID')
     gtype = models.CharField(default='', max_length=1,  choices=TYPES,
