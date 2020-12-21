@@ -1,3 +1,4 @@
+import debug_toolbar
 from django import urls
 from django.urls import include, path
 from django.contrib import admin
@@ -18,6 +19,8 @@ admin_router.register(r'bans', views.GameBanListViewSet)
 admin_router.register(r'adds', views.GameAddListViewSet)
 admin_router.register(r'access', views.AccessStatsViewSet)
 
+
+
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
@@ -25,5 +28,6 @@ urlpatterns = [
     path('api-token-auth/', obtain_auth_token),
     path('', include(visitor_router.urls)),
     path('adv/', include(admin_router.urls)),
-    path('test', views.test)
+    path('test', views.test),
+    path('__debug__/', include(debug_toolbar.urls))  
 ]
