@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 22:03:43
+# @LastEditTime : 2020-12-21 17:38:14
 # @Description  : 视图函数
 '''
 from requests.sessions import session
@@ -109,3 +109,4 @@ class GameSimpleInfoViewSet(viewsets.ModelViewSet):
 
     queryset = GameInfo.objects.all()
     serializer_class = GameSimpleInfoSerializer
+    http_method_names = ['get']
