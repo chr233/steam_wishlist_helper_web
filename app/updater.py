@@ -123,11 +123,10 @@ def __modify_game_price(appid, price, g: GameInfo = None):
 
 def add_new_games():
     '''添加新游戏'''
-    print_log('添加新游戏')
-    qs = GameAddList.objects.all()[:500]
-    print_log(f'开始执行任务,共{len(qs)}个游戏')
+    qs = GameAddList.objects.all()[:50]
+    print_log(f'添加新游戏,共{len(qs)}个游戏')
     ss = Session()
-    for ag in qs:
+    for ag in qs.iterator():
         appid = ag.appid
         try:
             print_log(f'开始处理app {appid} 信息')
@@ -171,12 +170,11 @@ def add_new_games():
 
 def update_current_games_info():
     '''更新现有游戏'''
-    print_log('更新游戏基本信息')
     ts = get_timestamp()
     qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[:50]
     ss = Session()
-    print_log(f'开始执行任务,共{len(qs)}个游戏')
-    for g in qs:
+    print_log(f'更新游戏基本信息,共{len(qs)}个游戏')
+    for g in qs.iterator():
         appid = g.appid
         try:
             print_log(f'开始处理app {appid} 信息')
@@ -204,11 +202,10 @@ def update_current_games_info():
 
 def update_current_games_price():
     '''更新现有游戏'''
-    print_log('更新游戏价格信息')
     ts = get_timestamp()
     qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[:50]
     ss = Session()
-    print_log(f'开始执行任务,共{len(qs)}个游戏')
+    print_log(f'更新游戏价格信息,共{len(qs)}个游戏')
 
     a2p_map = {}  # appid和plains对照表
     appidlist = []
