@@ -11,6 +11,8 @@ from .spider.basic import print_log
 INFO_PERIOD = settings.SWH_SETTINGS['INFO_UPDATE_PERIOD']
 PRICE_PERIOD = settings.SWH_SETTINGS['PRICE_UPDATE_PERIOD']
 MAX_ERROR = settings.SWH_SETTINGS['MAX_ERROR']
+NEW_GAME_AMOUNT = settings.SWH_SETTINGS['NEW_GAME_AMOUNT']
+OLD_GAME_AMOUNT = settings.SWH_SETTINGS['OLD_GAME_AMOUNT']
 
 
 def __gen_tag_list(tags: list) -> list:
@@ -123,8 +125,11 @@ def __modify_game_price(appid, price, g: GameInfo = None):
 
 def add_new_games():
     '''添加新游戏'''
-    qs = GameAddList.objects.all()[:50]
-    print_log(f'添加新游戏,共{len(qs)}个游戏')
+    qs = GameAddList.objects.all()[:NEW_GAME_AMOUNT]
+    count = qs.count()
+    if count == 0:
+        return
+    print_log(f'添加新游戏,共{count}个游戏')
     ss = Session()
     for ag in qs.iterator():
         appid = ag.appid
@@ -171,9 +176,13 @@ def add_new_games():
 def update_current_games_info():
     '''更新现有游戏'''
     ts = get_timestamp()
-    qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[:50]
+    qs = GameInfo.objects.filter(eupdate=True, tuinfo__lte=ts)[
+        :OLD_GAME_AMOUNT]
+    count = qs.count()
+    if count == 0:
+        return
+    print_log(f'更新游戏基本信息,共{count}个游戏')
     ss = Session()
-    print_log(f'更新游戏基本信息,共{len(qs)}个游戏')
     for g in qs.iterator():
         appid = g.appid
         try:
@@ -201,12 +210,15 @@ def update_current_games_info():
 
 
 def update_current_games_price():
-    '''更新现有游戏'''
+    '''更新现有游戏价格'''
     ts = get_timestamp()
-    qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[:50]
+    qs = GameInfo.objects.filter(eupdate=True, tuprice__lte=ts)[
+        :OLD_GAME_AMOUNT]
+    count = qs.count()
+    if count == 0:
+        return
+    print_log(f'更新游戏价格信息,共{count}个游戏')
     ss = Session()
-    print_log(f'更新游戏价格信息,共{len(qs)}个游戏')
-
     a2p_map = {}  # appid和plains对照表
     appidlist = []
     for g in qs:  # 为没有plains的条目添加plains
