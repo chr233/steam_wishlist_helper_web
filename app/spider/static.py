@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-05-03 23:20:00
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-20 18:30:43
+# @LastEditTime : 2021-01-13 23:39:40
 # @Description  : 静态常量
 '''
 
@@ -58,7 +58,7 @@ class AppNotFound(Exception):
     '''App不存在'''
     msg: str
 
-    def __init__(self, msg):
+    def __init__(self, msg='App不存在'):
         self.msg = msg
 
     def __str__(self) -> str:

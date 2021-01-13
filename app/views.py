@@ -3,7 +3,7 @@
 # @Author       : Chr_
 # @Date         : 2020-12-11 20:05:41
 # @LastEditors  : Chr_
-# @LastEditTime : 2020-12-21 17:38:14
+# @LastEditTime : 2021-01-13 23:36:51
 # @Description  : 视图函数
 '''
 from requests.sessions import session
@@ -31,8 +31,8 @@ def test(requests):
     # permission_classes = (permissions.IsAdminUser,)
     # ss=session()
     add_new_games()
-    update_current_games_info()
-    update_current_games_price()
+    # update_current_games_info()
+    # update_current_games_price()
     return HttpResponse('done')
 
 
