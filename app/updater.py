@@ -56,7 +56,7 @@ def __gen_company_list(tags: list) -> list:
             c = Company.objects.get(name=name)
         except Company.DoesNotExist:
             c = Company(name=name)
-            c.save()。、
+            c.save()
         finally:
             cs.append(c.id)
     return cs
